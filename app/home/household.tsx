@@ -1,11 +1,13 @@
 import { Text, View } from 'react-native';
+import HeaderText from '../../components/shared/HeaderText'
+import Container from '../../components/shared/Container'
 
 
 const HouseHold = () => {
    return (
-      <View>
-         <Text>House Hold</Text>
-      </View>
+      <Container>
+         <HeaderText>HouseHold</HeaderText>
+      </Container>
     );
 };
 

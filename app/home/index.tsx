@@ -1,37 +1,45 @@
-import { Link, Tabs } from 'expo-router'
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
-import Header from '../../components/HomeHeader'
-import { primaryColor } from '../../constants/colors'
+import Alert from '../../components/shared/Alert'
+import { accentColor, error, success, textDark, warn } from '../../constants/colors'
+import Container from '../../components/shared/Container'
 
 
 const Home = () => {
    return (
-      <View style={ styles.container }>
-         <Header />
-         <View style={ styles.areaView }>
-            <Text>Home</Text>
-            <Link href="/home/household">Go to House Hold</Link>
-            <Link href="/home/Recipes">Go to Recipes</Link>
-         </View>
-      </View>
+      <Container>
+         <ScrollView style={ styles.scrollContainer } contentContainerStyle={{ alignItems: "center" }}>
+            <View style={ styles.headerContainer }>
+               <Text style={ styles.headingText }>Hi Samuel</Text>
+               <Text style={ styles.subtitleText }>Welcome to your household dashboard.</Text>
+            </View>
+
+
+            <Alert color={success} title="Test Alert!" />
+            <Alert color={warn} title="Test Long Alert! Lorem Ipsem stuff you know what I mean?" />
+            <Alert color={error} title="Paige has added some items to your household shopping list." />
+         </ScrollView>
+      </Container>
     );
 };
 
 const styles = StyleSheet.create({
-   container: {
-      flex: 1,    
-    },
-   header: {
-      justifyContent: 'center',
-      alignItems: 'center',      
-      left: 0,
-      right: 0,
-      paddingTop: 10         
+   headerContainer: {
+      width: "90%",
+      paddingTop: 5,
+      paddingBottom: 15
    },
-   areaView: {
+   headingText: {
+      color: textDark,
+      fontSize: 24,
+   },
+   subtitleText: {
+      color: textDark,
+      fontSize: 16,
+   },
+   scrollContainer: {
       flex: 1,
-      alignItems: "center"
+      width: "100%",
    }
-});
+})
 
 export default Home;
