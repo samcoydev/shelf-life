@@ -30,7 +30,9 @@ const styles = StyleSheet.create({
    headerContainer: {
       height: 90,
       flexDirection: "row",
-      justifyContent: "space-evenly"
+      justifyContent: "space-evenly",
+      borderBottomColor: accentColor,
+      borderBottomWidth: StyleSheet.hairlineWidth,
    },
    backButton: {
       paddingTop: Platform.OS === "android" ? 125 : 0,

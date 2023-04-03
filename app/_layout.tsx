@@ -1,10 +1,12 @@
-import { Tabs } from 'expo-router'
+import { Tabs, useRouter } from 'expo-router'
 import { accentColor, ctaColor, dominantColor, textLight } from '../constants/colors'
-import { BoxIso, Cart, HomeSimple, IconoirProvider, Settings, User } from 'iconoir-react-native'
-import { StyleSheet, Text } from 'react-native'
+import { ArrowLeft, Book, BoxIso, Cart, HomeSimple, IconoirProvider, InfoEmpty, Leaf, Settings, User } from 'iconoir-react-native'
+import { Pressable, StyleSheet, Text } from 'react-native'
 import Header from '../components/Header'
 
 export default function AppLayout() {
+   const router = useRouter();
+
    return (
       <IconoirProvider
          iconProps={{
@@ -13,9 +15,16 @@ export default function AppLayout() {
             height: 32,
             width: 32
          }}>
-         <Header />
-         <Tabs screenOptions={{
-                  headerShown: false,
+         {/* <Header /> */}
+         <Tabs initialRouteName={"home"} screenOptions={{
+                  headerTitle: (props) => <Leaf color={ dominantColor }  />,
+                  headerLeft: (props) => (
+                     <Pressable onPress={() => router.back()}>
+                        <ArrowLeft style={{marginLeft: 15}} width={25} height={25} />
+                     </Pressable>
+                  ),
+                  headerRight: (props) => <InfoButton />,
+                  headerTitleAlign: "center",
                   tabBarActiveTintColor: dominantColor,
                   tabBarInactiveTintColor: textLight,
                   tabBarStyle: {
@@ -26,7 +35,7 @@ export default function AppLayout() {
             <Tabs.Screen 
                name="home" 
                options={{ 
-                  href: "/home",
+                  href: "home",
                   tabBarLabel: ({ focused }) => <Text style={[ styles.tabButtonStyle, focused ? styles.activeButton : null ]}>Home</Text>,
                   tabBarIcon: ({focused}) => { return <HomeSimple color={focused ? dominantColor : textLight} /> }
                }} 
@@ -46,23 +55,32 @@ export default function AppLayout() {
                }} 
             />
             <Tabs.Screen 
+               name="recipes" 
+               options={{ 
+                  tabBarLabel: ({ focused }) => <Text style={[ styles.tabButtonStyle, focused ? styles.activeButton : null ]}>Recipes</Text>,
+                  tabBarIcon: ({focused}) => { return <Book color={focused ? dominantColor : textLight} /> } 
+               }} 
+            />
+            <Tabs.Screen 
                name="profile" 
                options={{ 
                   tabBarLabel: ({ focused }) => <Text style={[ styles.tabButtonStyle, focused ? styles.activeButton : null ]}>Profile</Text>,
                   tabBarIcon: ({focused}) => { return <User color={focused ? dominantColor : textLight} /> } 
                }} 
             />
-            <Tabs.Screen 
-               name="settings" 
-               options={{ 
-                  tabBarLabel: ({ focused }) => <Text style={[ styles.tabButtonStyle, focused ? styles.activeButton : null ]}>Settings</Text>,
-                  tabBarIcon: ({focused}) => { return <Settings color={focused ? dominantColor : textLight} /> } 
-               }} 
-            />
+            <Tabs.Screen name="index" options={{href: null}} />
          </Tabs>
       </IconoirProvider> 
    )
 };
+
+const InfoButton = () => {
+   return (
+      <Pressable onPress={() => alert("Info Button!")}>
+         <InfoEmpty style={{marginRight: 15}} width={25} height={25} />
+      </Pressable>
+   )
+}
 
 export const styles = StyleSheet.create({
    tabButtonStyle: {

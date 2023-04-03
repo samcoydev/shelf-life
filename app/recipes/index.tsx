@@ -1,9 +1,9 @@
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
-import Alert from '../../../components/shared/Alert'
-import { accentColor, ctaColor, dominantColor, error, success, textDark, textLight, warn } from '../../../constants/colors'
+import Alert from '../../components/shared/Alert'
+import { accentColor, ctaColor, dominantColor, error, success, textDark, textLight, warn } from '../../constants/colors'
 import { BirthdayCake, BreadSlice, Clutery, CoffeeCup, GlassHalf, GlassHalfAlt, Home, IconoirProvider, Leaf } from 'iconoir-react-native'
 import { useRouter } from 'expo-router'
-import Container from '../../../components/shared/Container'
+import Container from '../../components/shared/Container'
 
 
 const RecipeCategories = () => {
@@ -35,7 +35,7 @@ const Category = ({title, icon}) => {
    return (
       <Pressable 
          style={ styles.categoryContainer }
-         onPress={() => {router.push({pathname: "/home/recipes/category", params: { name: title }})} }>
+         onPress={() => {router.push({pathname: "/recipes/category", params: { name: title }})} }>
          {icon}
          <Text style={ styles.headingText }>{title}</Text>
       </Pressable>

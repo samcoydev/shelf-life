@@ -1,7 +1,7 @@
 import { Slot } from 'expo-router'
 import HomeHeader from '../../components/HomeHeader'
 
-export default function HomeLayout() {
+export default function RecipeLayout() {
    return (
       <>
          <Slot />

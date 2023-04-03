@@ -1,7 +1,7 @@
 import { Link, Tabs } from 'expo-router'
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
-import Header from '../../components/HomeHeader'
-import { primaryColor } from '../../constants/colors'
+import Header from '../../../components/HomeHeader'
+import { primaryColor } from '../../../constants/colors'
 
 
 const SettingsLayout = () => {
