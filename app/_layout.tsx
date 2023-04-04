@@ -1,76 +1,79 @@
 import { Tabs, useRouter } from 'expo-router'
-import { accentColor, ctaColor, dominantColor, textLight } from '../constants/colors'
+import { accentColor, ctaColor, dominantColor, textDark, textLight } from '../constants/colors'
 import { ArrowLeft, Book, BoxIso, Cart, HomeSimple, IconoirProvider, InfoEmpty, Leaf, Settings, User } from 'iconoir-react-native'
 import { Pressable, StyleSheet, Text } from 'react-native'
 import Header from '../components/Header'
+import { ThemeProvider, createTheme } from '@rneui/themed'
 
 export default function AppLayout() {
    const router = useRouter();
 
    return (
-      <IconoirProvider
-         iconProps={{
-            color: textLight,
-            strokeWidth: 1,
-            height: 32,
-            width: 32
-         }}>
-         {/* <Header /> */}
-         <Tabs initialRouteName={"home"} screenOptions={{
-                  headerTitle: (props) => <Leaf color={ dominantColor }  />,
-                  headerLeft: (props) => (
-                     <Pressable onPress={() => router.back()}>
-                        <ArrowLeft style={{marginLeft: 15}} width={25} height={25} />
-                     </Pressable>
-                  ),
-                  headerRight: (props) => <InfoButton />,
-                  headerTitleAlign: "center",
-                  tabBarActiveTintColor: dominantColor,
-                  tabBarInactiveTintColor: textLight,
-                  tabBarStyle: {
-                     position: "absolute",
-                     height: 80
-                  },
-               }}>
-            <Tabs.Screen 
-               name="home" 
-               options={{ 
-                  href: "home",
-                  tabBarLabel: ({ focused }) => <Text style={[ styles.tabButtonStyle, focused ? styles.activeButton : null ]}>Home</Text>,
-                  tabBarIcon: ({focused}) => { return <HomeSimple color={focused ? dominantColor : textLight} /> }
-               }} 
-            />
-            <Tabs.Screen 
-               name="pantry" 
-               options={{ 
-                  tabBarLabel: ({ focused }) => <Text style={[ styles.tabButtonStyle, focused ? styles.activeButton : null ]}>Pantry</Text>,
-                  tabBarIcon: ({focused}) => { return <BoxIso color={focused ? dominantColor : textLight} /> }
-               }} 
-            />
-            <Tabs.Screen 
-               name="list" 
-               options={{ 
-                  tabBarLabel: ({ focused }) => <Text style={[ styles.tabButtonStyle, focused ? styles.activeButton : null ]}>List</Text>,
-                  tabBarIcon: ({focused}) => { return <Cart color={focused ? dominantColor : textLight} /> } 
-               }} 
-            />
-            <Tabs.Screen 
-               name="recipes" 
-               options={{ 
-                  tabBarLabel: ({ focused }) => <Text style={[ styles.tabButtonStyle, focused ? styles.activeButton : null ]}>Recipes</Text>,
-                  tabBarIcon: ({focused}) => { return <Book color={focused ? dominantColor : textLight} /> } 
-               }} 
-            />
-            <Tabs.Screen 
-               name="profile" 
-               options={{ 
-                  tabBarLabel: ({ focused }) => <Text style={[ styles.tabButtonStyle, focused ? styles.activeButton : null ]}>Profile</Text>,
-                  tabBarIcon: ({focused}) => { return <User color={focused ? dominantColor : textLight} /> } 
-               }} 
-            />
-            <Tabs.Screen name="index" options={{href: null}} />
-         </Tabs>
-      </IconoirProvider> 
+      <ThemeProvider theme={theme}>
+         <IconoirProvider
+            iconProps={{
+               color: textLight,
+               strokeWidth: 1,
+               height: 32,
+               width: 32
+            }} children={''}>
+            {/* <Header /> */}
+            <Tabs initialRouteName={"home"} screenOptions={{
+                     headerTitle: (props) => <Leaf color={ dominantColor }  />,
+                     headerLeft: (props) => (
+                        <Pressable onPress={() => router.back()}>
+                           <ArrowLeft style={{marginLeft: 15}} width={25} height={25} />
+                        </Pressable>
+                     ),
+                     headerRight: (props) => <InfoButton />,
+                     headerTitleAlign: "center",
+                     tabBarActiveTintColor: dominantColor,
+                     tabBarInactiveTintColor: textLight,
+                     tabBarStyle: {
+                        position: "absolute",
+                        height: 80
+                     },
+                  }}>
+               <Tabs.Screen 
+                  name="home" 
+                  options={{ 
+                     href: "home",
+                     tabBarLabel: ({ focused }) => <Text style={[ styles.tabButtonStyle, focused ? styles.activeButton : null ]}>Home</Text>,
+                     tabBarIcon: ({focused}) => { return <HomeSimple color={focused ? dominantColor : textLight} /> }
+                  }} 
+               />
+               <Tabs.Screen 
+                  name="pantry" 
+                  options={{
+                     tabBarLabel: ({ focused }) => <Text style={[ styles.tabButtonStyle, focused ? styles.activeButton : null ]}>Pantry</Text>,
+                     tabBarIcon: ({focused}) => { return <BoxIso color={focused ? dominantColor : textLight} /> }
+                  }} 
+               />
+               <Tabs.Screen 
+                  name="list" 
+                  options={{ 
+                     tabBarLabel: ({ focused }) => <Text style={[ styles.tabButtonStyle, focused ? styles.activeButton : null ]}>List</Text>,
+                     tabBarIcon: ({focused}) => { return <Cart color={focused ? dominantColor : textLight} /> } 
+                  }} 
+               />
+               <Tabs.Screen 
+                  name="recipes" 
+                  options={{ 
+                     tabBarLabel: ({ focused }) => <Text style={[ styles.tabButtonStyle, focused ? styles.activeButton : null ]}>Recipes</Text>,
+                     tabBarIcon: ({focused}) => { return <Book color={focused ? dominantColor : textLight} /> } 
+                  }} 
+               />
+               <Tabs.Screen 
+                  name="profile" 
+                  options={{ 
+                     tabBarLabel: ({ focused }) => <Text style={[ styles.tabButtonStyle, focused ? styles.activeButton : null ]}>Profile</Text>,
+                     tabBarIcon: ({focused}) => { return <User color={focused ? dominantColor : textLight} /> } 
+                  }} 
+               />
+               <Tabs.Screen name="index" options={{href: null}} />
+            </Tabs>
+         </IconoirProvider> 
+      </ThemeProvider>
    )
 };
 
@@ -81,6 +84,19 @@ const InfoButton = () => {
       </Pressable>
    )
 }
+
+
+const theme = createTheme({
+   components: {
+     CheckBox: {
+         iconType: "material-community",
+         checkedIcon: "checkbox-outline",
+         uncheckedIcon: 'checkbox-blank-outline',
+         checkedColor: dominantColor,
+         uncheckedColor: textDark
+     },
+   },
+ });
 
 export const styles = StyleSheet.create({
    tabButtonStyle: {

@@ -12,11 +12,11 @@ const RecipeCategories = () => {
          <ScrollView style={ styles.scrollContainer } contentContainerStyle={{ alignItems: "center" }}>
             <IconoirProvider
                iconProps={{
-                  color: ctaColor,
+                  color: dominantColor,
                   strokeWidth: 1.5,
                   height: 32,
                   width: 32
-            }}>
+               }} children={''}>
                <Category icon={ <BreadSlice /> } title="Appetizers" />
                <Category icon={ <Clutery /> } title="Entrees" />
                <Category icon={ <GlassHalf /> } title="Soups" />
