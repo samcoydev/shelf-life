@@ -15,15 +15,17 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.samcodesthings.shelflife"
     },
     "android": {
+      "package": "com.samcodesthings.shelflife",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       }
     },
-    "scheme": "shelf-life",
+    "scheme": "com.samcodesthings.shelflife://oauth2redirect",
     "web": {
       "bundler": "metro",
       "favicon": "./assets/favicon.png"
