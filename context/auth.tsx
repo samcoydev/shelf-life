@@ -1,70 +1,109 @@
-// import { useRouter, useSegments } from "expo-router";
-// import React from "react";
-// import { useAuthRequest, makeRedirectUri, useAutoDiscovery } from 'expo-auth-session';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form'
+import { StyleSheet, Text, View, TextInput, Button } from 'react-native'
+import { AuthenticationDetails, CognitoUser, CognitoUserAttribute, CognitoUserSession } from 'amazon-cognito-identity-js'
+import { useRouter, useSearchParams, useSegments } from 'expo-router'
+import { createContext, useContext, useState } from 'react'
+import UserPool from './UserPool'
+import React from 'react'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
-// const AuthContext = React.createContext(null);
+export const getSession = async () => {
+   return await new Promise<CognitoUserSession>((resolve, reject) => {
+      const user = UserPool.getCurrentUser();
 
-// // This hook can be used to access the user info.
-// export function useAuth() {
-//   return React.useContext(AuthContext);
-// }
+      if (user) {
+         user.getSession((err, session) => {
+            if (err) {
+               reject();
+            } else {
+               resolve(session);
+            }
+         });
+      } else {
+         reject();
+      }
+   })
+}
 
-// // This hook will protect the route access based on user authentication.
-// function useProtectedRoute(user) {
-//   const segments = useSegments();
-//   const router = useRouter();
+export const login = async (Username: string, Password: string) => {
+   console.log("Attempting to log in with username:", Username);
+   return await new Promise<CognitoUserSession>((resolve, reject) => {
+      const user = new CognitoUser({
+         Username,
+         Pool: UserPool,
+      });
 
-//   React.useEffect(() => {
-//     const inAuthGroup = segments[0] === "(auth)";
+      const authDetails = new AuthenticationDetails({
+         Username,
+         Password
+      });
 
-//     if (
-//       // If the user is not signed in and the initial segment is not anything in the auth group.
-//       !user &&
-//       !inAuthGroup
-//     ) {
-//       // Redirect to the sign-in page.
-//       router.replace("/sign-in");
-//     } else if (user && inAuthGroup) {
-//       // Redirect away from the sign-in page.
-//       router.replace("/");
-//     }
-//   }, [user, segments]);
-// }
+      console.log("Auth details:", authDetails);
 
-// export function Provider(props) {
-//   const [user, setAuth] = React.useState(null);
-//   const discovery = useAutoDiscovery("https://coycafe.ddns.net:8080/realms/shelf-life-dev");
+      user.authenticateUser(authDetails, {
+         onSuccess: (session) => {
+            console.log("Success! ", session);
+            resolve(session);
+         },
+         onFailure: (err) => {
+            console.error("Failed. ", err);
+            reject(err);
+         },
+      })
+   })
+};
 
-//   // Request
-//   const [request, response, promptAsync] = useAuthRequest(
-//     {
-//       clientId: 'shelf-life-app',
-//       scopes: ['openid', 'profile'],
-//       // For usage in managed apps using the proxy
-//       redirectUri: makeRedirectUri({
-//         // For usage in bare and standalone
-//         native: 'com.samcodesthings.react://oauth2redirect',
-//         useProxy: true,
-//       }),
-//     },
-//     discovery
-//   );
+export const logout = () => {
+   const user = UserPool.getCurrentUser();
+   if (user) {
+      user.signOut();
+      console.log("Signed out");
+      return;
+   }
+   console.log("Already signed out");
+}
 
-//   // Redirect the user to the sign-in page if they are not authenticated
-//   useProtectedRoute(user);
+function useProtectedRoute(authToken) {
+   const segments = useSegments();
+   const router = useRouter();
+ 
+   React.useEffect(() => {
+     const inAuthGroup = segments[0] === "(auth)";
+ 
+     if (
+       // If the user is not signed in and the initial segment is not anything in the auth group.
+       !authToken &&
+       !inAuthGroup
+     ) {
+       // Redirect to the sign-in page.
+       router.replace("/log-in");
+     } else if (authToken && inAuthGroup) {
+       // Redirect away from the sign-in page.
+       router.replace("/");
+     }
+   }, [authToken, segments]);
+ }
 
-//   return (
-//     <AuthContext.Provider
-//       value={{
-//         signIn: async () => {
-//           // Prompt the user to sign in
-//           setAuth(await promptAsync());
-//         },
-//         signOut: () => setAuth(null),
-//         user,
-//       }}
-//     >
-//       {props.children}
-//     </AuthContext.Provider>
-//   );
-// }
+interface AuthContextType {
+   accessToken: string | null;
+   setAccessToken: (accessToken: string | null) => void;
+ }
+ 
+ export const AuthContext = createContext<AuthContextType>({
+   accessToken: null,
+   setAccessToken: () => {},
+ });
+ 
+export const AuthProvider = (props: { children: React.ReactNode }) => {  
+   const [accessToken, setAccessToken] = useState(null);
+
+   
+
+   useProtectedRoute(accessToken);
+ 
+   return (
+     <AuthContext.Provider value={{ accessToken, setAccessToken }}>
+       {props.children}
+     </AuthContext.Provider>
+   );
+ };
