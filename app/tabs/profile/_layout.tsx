@@ -1,16 +1,23 @@
 import { Button, StyleSheet, Text, View } from 'react-native'
-import { AuthContext, logout } from '../../../context/Auth'
+import { AuthContext } from '../../../context/Auth'
 import { useContext } from 'react'
+import { ShoppingListAPI } from '../../../api/shopping-list-api'
+import { dominantColor } from '../../../constants/colors'
 
 
 const ProfileLayout = () => {
 
-   const { accessToken, setAccessToken } = useContext(AuthContext);
+   const { forgetUser, logout, accessToken } = useContext(AuthContext);
 
    const onSubmit = () => {
+      forgetUser();
       logout();
-      setAccessToken(null);
    };
+
+   const ping = (secure: boolean) => {
+      if (secure) ShoppingListAPI.pingSecured(accessToken).then(data => console.log("data: " + JSON.stringify(data)), err => console.error("Error: ", err));
+      else ShoppingListAPI.ping().then(data => console.log("data: " + JSON.stringify(data)), err => console.error("Error: ", err));
+   }
 
    return (
       <View style={ styles.container }>
@@ -18,11 +25,25 @@ const ProfileLayout = () => {
             <Text>profile</Text>
 
             <View style={styles.button}>
-            <Button
-               title="Log Out"
-               onPress={() => onSubmit()}
-            />
-         </View>
+               <Button
+                  title="Log Out"
+                  onPress={() => onSubmit()}
+               />
+            </View>
+
+            <View style={styles.button}>
+               <Button
+                  title="Ping Secured"
+                  onPress={() => ping(true)}
+               />
+            </View>
+
+            <View style={styles.button}>
+               <Button
+                  title="Ping Insecured"
+                  onPress={() => ping(false)}
+               />
+            </View>
          </View>
       </View>
     );
@@ -36,7 +57,7 @@ const styles = StyleSheet.create({
       marginTop: 40,
       color: 'white',
       height: 40,
-      backgroundColor: '#ec5990',
+      backgroundColor: dominantColor,
       borderRadius: 4,
    },
    header: {

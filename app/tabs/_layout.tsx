@@ -5,14 +5,6 @@ import { ArrowLeft, Book, BoxIso, Cart, HomeSimple, IconoirProvider, InfoEmpty, 
 import { Pressable, StyleSheet, Text } from 'react-native'
 import { ctaColor, dominantColor, textDark, textLight } from '../../constants/colors'
 
-
-WebBrowser.maybeCompleteAuthSession();
-
-const clientId = '2ak85eftqov209augksrbap1ki';
-const userPoolUrl =
-  'https://shelf-life-alpha.auth.us-east-2.amazoncognito.com';
-const redirectUri = 'com.samcodesthings.shelflife://oauth2redirect';
-
 export default function AppLayout() {
    const router = useRouter();
 

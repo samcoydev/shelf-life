@@ -5,8 +5,8 @@ import HeaderText from '../../components/shared/HeaderText'
 import { AuthenticationDetails, CognitoUser, CognitoUserAttribute } from 'amazon-cognito-identity-js'
 import { Link, useRouter, useSearchParams } from 'expo-router'
 import UserPool from '../../context/UserPool'
-import { useContext } from "react"
-import { AuthContext, login } from '../../context/Auth'
+import { useContext, useEffect } from "react"
+import { AuthContext } from '../../context/Auth'
 
 type Inputs = {
    email: string,
@@ -15,19 +15,28 @@ type Inputs = {
 
 const Login = () => {  
    const router = useRouter();
-   const { accessToken, setAccessToken } = useContext(AuthContext);
+   const { rememberUser, getRememberedUser, login, setAccessToken } = useContext(AuthContext);
    const { control, handleSubmit, formState: {errors, isValid} } = useForm({mode: 'onBlur'})
 
    const onSubmit: SubmitHandler<Inputs> = data => {
       login(data.email, data.password)
          .then((data) => {
-            setAccessToken(data.getAccessToken().getJwtToken());
+            console.log("Logged in!");
          })
          .catch((err) => {
             alert("Oops, " + err);
             console.error("Failed to log in.", err);
          });
    };
+
+   useEffect(() => {
+      getRememberedUser().then(
+         data => {
+            if (data !== null)
+               setAccessToken(data);
+         }
+      )
+   }, [])
 
    return (
       <View style={styles.container}>
