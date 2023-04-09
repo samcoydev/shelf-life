@@ -1,16 +1,20 @@
 import { Button, StyleSheet, Text, View } from 'react-native'
-import { AuthContext, logout } from '../../../context/Auth'
+import { AuthContext } from '../../../context/Auth'
 import { useContext } from 'react'
 
 
 const ProfileLayout = () => {
 
-   const { accessToken, setAccessToken } = useContext(AuthContext);
+   const { forgetUser, logout, getSession } = useContext(AuthContext);
 
    const onSubmit = () => {
+      forgetUser();
       logout();
-      setAccessToken(null);
    };
+
+   const test = () => {
+      getSession().then(data => {console.log("Getting sesh ", data), err => {console.error("Couldnt get sesh my dude ", err)}})
+   }
 
    return (
       <View style={ styles.container }>
@@ -21,6 +25,11 @@ const ProfileLayout = () => {
             <Button
                title="Log Out"
                onPress={() => onSubmit()}
+            />
+
+            <Button 
+               title="test"
+               onPress={() => test()}
             />
          </View>
          </View>
