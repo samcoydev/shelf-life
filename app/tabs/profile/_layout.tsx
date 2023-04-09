@@ -3,6 +3,7 @@ import { AuthContext } from '../../../context/Auth'
 import { useContext } from 'react'
 import { ShoppingListAPI } from '../../../api/shopping-list-api'
 import { dominantColor } from '../../../constants/colors'
+import axios from 'axios';
 
 
 const ProfileLayout = () => {

@@ -1,6 +1,5 @@
 import { ThemeProvider, createTheme } from '@rneui/themed'
 import { Tabs, useRouter } from 'expo-router'
-import * as WebBrowser from 'expo-web-browser'
 import { ArrowLeft, Book, BoxIso, Cart, HomeSimple, IconoirProvider, InfoEmpty, Leaf, User } from 'iconoir-react-native'
 import { Pressable, StyleSheet, Text } from 'react-native'
 import { ctaColor, dominantColor, textDark, textLight } from '../../constants/colors'
