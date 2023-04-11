@@ -1,11 +1,13 @@
 import { Input } from '@rneui/themed'
-import { Controller, SubmitHandler, useForm } from 'react-hook-form'
+import { Controller, SubmitHandler, useController, useForm } from 'react-hook-form'
 import { StyleSheet, Text, View, TextInput, Button } from 'react-native'
 import { primaryColor, textDark } from '../../constants/colors'
 import HeaderText from '../../components/shared/HeaderText'
 import UserPool from '../../context/UserPool'
 import { CognitoUserAttribute } from 'amazon-cognito-identity-js'
 import { Link, useRouter } from 'expo-router'
+import { UserAPI } from '../../api/user-api'
+import { UserData } from '../../types/user-data'
 
 type Inputs = {
    email: string,
@@ -19,16 +21,29 @@ const Signup = () => {
 
    const { control, handleSubmit, formState: {errors, isValid} } = useForm({mode: 'onBlur'})
 
-    const onSubmit: SubmitHandler<Inputs> = data => {
-       UserPool.signUp(data.email, data.password, [
-            new CognitoUserAttribute({Name: "given_name", Value: data.given_name}), 
-            new CognitoUserAttribute({Name: "family_name", Value: data.family_name})], null, (err, d) => {
-          if (err) {
-             console.error(err);
-          }
-          console.log(d);
-          router.push({pathname: "confirm-email", params: { username: d.user.getUsername()}})
-       });
+    const onSubmit: SubmitHandler<Inputs> = async data => {
+
+      const newUserData: UserData = {id: -1, email: data.email, hasBeenWelcomed: false}
+      let userPosted: boolean = false;
+
+      await UserAPI.postUserData(newUserData).then(res => {
+        console.log("Posted user successfully");
+        userPosted = true;
+      }, err => {
+        console.error("There was a problem posting the user data: ", err);
+      })
+
+      if (!userPosted) return;
+
+      UserPool.signUp(data.email, data.password, [
+         new CognitoUserAttribute({Name: "given_name", Value: data.given_name}), 
+         new CognitoUserAttribute({Name: "family_name", Value: data.family_name})], null, (err, data) => {
+         if (err) {
+            console.error(err);
+         }
+         console.log(data);
+         router.push({pathname: "confirm-email", params: { username: data.user.getUsername()}})
+      });
     };
 
    return (

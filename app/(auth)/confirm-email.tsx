@@ -6,6 +6,8 @@ import HeaderText from '../../components/shared/HeaderText'
 import UserPool from '../../context/UserPool'
 import { CognitoUser, CognitoUserAttribute } from 'amazon-cognito-identity-js'
 import { useRouter, useSearchParams } from 'expo-router'
+import { UserAPI } from '../../api/user-api'
+import { UserData } from '../../types/user-data'
 
 type Inputs = {
    code: string
@@ -27,11 +29,11 @@ const ConfirmEmail = () => {
        };
 
       const cognitoUser = new CognitoUser(userData);
-      cognitoUser.confirmRegistration(data.code, true, (err, result) => {
+      cognitoUser.confirmRegistration(data.code, true, async (err, result) => {
         if (err) {
           console.log(err);
         } else {
-          console.log(result);
+          console.log("Verified!");
 
           router.push({pathname: "log-in"})
         }

@@ -1,11 +1,19 @@
 import { ThemeProvider, createTheme } from '@rneui/themed'
-import { Tabs, useRouter } from 'expo-router'
+import { Tabs, useFocusEffect, useRouter } from 'expo-router'
 import { ArrowLeft, Book, BoxIso, Cart, HomeSimple, IconoirProvider, InfoEmpty, Leaf, User } from 'iconoir-react-native'
 import { Pressable, StyleSheet, Text } from 'react-native'
 import { ctaColor, dominantColor, textDark, textLight } from '../../constants/colors'
+import { AuthContext } from '../../context/auth'
+import { useContext, useEffect } from 'react'
 
 export default function AppLayout() {
    const router = useRouter();
+   const { userData } = useContext(AuthContext);
+
+   useEffect(() => {
+      if (userData !== null && !userData.hasBeenWelcomed)
+         router.push("/welcome-page")
+   }, [])
 
    return (
       <ThemeProvider theme={theme}>

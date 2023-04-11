@@ -1,5 +1,5 @@
 import { Button, StyleSheet, Text, View } from 'react-native'
-import { AuthContext } from '../../../context/Auth'
+import { AuthContext } from '../../../context/auth'
 import { useContext } from 'react'
 import { ShoppingListAPI } from '../../../api/shopping-list-api'
 import { dominantColor } from '../../../constants/colors'
@@ -15,11 +15,6 @@ const ProfileLayout = () => {
       logout();
    };
 
-   const ping = (secure: boolean) => {
-      if (secure) ShoppingListAPI.pingSecured(accessToken).then(data => console.log("data: " + JSON.stringify(data)), err => console.error("Error: ", err));
-      else ShoppingListAPI.ping().then(data => console.log("data: " + JSON.stringify(data)), err => console.error("Error: ", err));
-   }
-
    return (
       <View style={ styles.container }>
          <View style={ styles.areaView }>
@@ -29,20 +24,6 @@ const ProfileLayout = () => {
                <Button
                   title="Log Out"
                   onPress={() => onSubmit()}
-               />
-            </View>
-
-            <View style={styles.button}>
-               <Button
-                  title="Ping Secured"
-                  onPress={() => ping(true)}
-               />
-            </View>
-
-            <View style={styles.button}>
-               <Button
-                  title="Ping Insecured"
-                  onPress={() => ping(false)}
                />
             </View>
          </View>

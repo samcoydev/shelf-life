@@ -1,50 +1,41 @@
+import { Link, useRouter } from 'expo-router'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
-import { StyleSheet, Text, View, TextInput, Button, Pressable } from 'react-native'
-import { accentColor, dominantColor, textDark, textLight } from '../../constants/colors'
+import { StyleSheet, Text, View, TextInput, Pressable } from 'react-native'
 import HeaderText from '../../components/shared/HeaderText'
-import { AuthenticationDetails, CognitoUser, CognitoUserAttribute } from 'amazon-cognito-identity-js'
-import { Link, useRouter, useSearchParams } from 'expo-router'
-import UserPool from '../../context/UserPool'
-import { useContext, useEffect } from "react"
+import { textDark, dominantColor, textLight } from '../../constants/colors'
+import { HouseholdAPI } from '../../api/household-api'
+import { useContext } from 'react'
 import { AuthContext } from '../../context/auth'
-import { UserAPI } from '../../api/user-api'
-import { UserData } from '../../types/user-data';
 
 type Inputs = {
-   email: string,
-   password: string,
+   householdName: string,
+   emailRecipient: string,
  };
 
-const Login = () => {  
+const CreateHousehold = () => {
    const router = useRouter();
-   const { storeUserData, login } = useContext(AuthContext);
+   const { getStoredUserData } = useContext(AuthContext);
    const { control, handleSubmit, formState: {errors, isValid} } = useForm({mode: 'onBlur'})
 
-   const onSubmit: SubmitHandler<Inputs> = data => {
-      login(data.email, data.password)
-         .then((session) => {
-            UserAPI.getUserData(data.email).then(response => {
-               console.log("RES: ", response)
-               if (response.status === 200) {
-                  storeUserData(response.data)
-               } else {
-                  console.error("There was a status problem fetching user data for: ", data.email)
-               }
-            }, err => {
-               console.error("There was a problem fetching user data for: ", data.email, err)
-            });
-         })
-         .catch((err) => {
-            alert("Oops, " + err);
-            console.error("Failed to log in.", err);
-         });
-   };
+   const onSubmitNewHousehold: SubmitHandler<Inputs> = data => {
+      getStoredUserData().then(email => {
+         HouseholdAPI.postHousehold({id: -1, name: data.householdName}, email);
+         console.log("Attempting to post new household with email: " + email);
+      }, err => {
+         console.error("There was a problem getting the users stored data. ", err);
+      });
+   }
+
+   const onSubmitRequest: SubmitHandler<Inputs> = data => {
+      console.log("Req");
+   }
 
    return (
       <View style={styles.container}>
-         <HeaderText>Log In</HeaderText>
+         <HeaderText>Welcome to Shelf Life</HeaderText>
+         <Text style={{ color: textLight }}>Would you like to create a new Household, or request to join an existing one?</Text>
 
-         <Text style={styles.label}>Email</Text>
+         <Text style={styles.label}>Household Name</Text>
          <Controller
             control={control}
             render={({field: { onChange, onBlur, value }}) => (
@@ -55,11 +46,14 @@ const Login = () => {
                   value={value}
                />
             )}
-            name="email"
-            rules={{ required: true }}
+            name="householdName"
          />
+
+         <Pressable style={styles.button} onPress={handleSubmit(onSubmitNewHousehold)}>
+            <Text style={ styles.buttonText }>Create Household</Text>
+         </Pressable>
          
-         <Text style={styles.label}>Password</Text>
+         <Text style={styles.label}>Email to Request</Text>
          <Controller
             control={control}
             render={({field: { onChange, onBlur, value }}) => (
@@ -70,19 +64,16 @@ const Login = () => {
                   value={value}
                />
             )}
-         name="password"
-         rules={{ required: true }}
+         name="emailRecipient"
          />
 
-         <Pressable style={styles.button} onPress={handleSubmit(onSubmit)}>
-            <Text style={ styles.buttonText }>Log In</Text>
+         <Pressable style={styles.button} onPress={handleSubmit(onSubmitRequest)}>
+            <Text style={ styles.buttonText }>Send Request</Text>
          </Pressable>
 
-         <Link style={ styles.label } href="/sign-up">Sign Up</Link>
-
       </View>
-   )
-}
+    );
+};
 
 const styles = StyleSheet.create({
    label: {
@@ -122,4 +113,5 @@ const styles = StyleSheet.create({
    },
  });
 
-export default Login;
+
+export default CreateHousehold;

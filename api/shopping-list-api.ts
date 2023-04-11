@@ -1,35 +1,18 @@
 import { API_URL } from '@env'
+import axios from 'axios'
+
+const URL_BASE = API_URL + "/shopping-list"
 
 export const ShoppingListAPI = {
 
-
    ping: async () => {
-      try {
-         const response = await fetch(
-           API_URL + "/shopping-list/ping",
-         );
-         const json = await response.json();
-         return json;
-       } catch (error) {
-         console.error(error);
-       }
+      axios(URL_BASE + "/ping").then(
+         data => {
+            console.log("[GET] Shopping list successful: ", data.data);
+            return data.data;
+         }, err => {
+            console.log("[GET] ERROR: " + err);
+         }
+      )
    },
-
-   pingSecured: async (token: string) => {
-      try {
-         const response = await fetch(
-           API_URL + "/shopping-list/ping", {
-            headers:{
-               Accept: 'application/json',
-                        'Content-Type': 'application/json',
-                        'Authorization': "Bearer " + token,
-                },
-           }
-         );
-         const json = await response.json();
-         return json;
-       } catch (error) {
-         console.error(error);
-       }
-   }
 }
