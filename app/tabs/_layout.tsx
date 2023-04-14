@@ -11,7 +11,7 @@ export default function AppLayout() {
    const { userData } = useContext(AuthContext);
 
    useEffect(() => {
-      if (userData !== null && !userData.hasBeenWelcomed)
+      if (userData && !userData.hasBeenWelcomed)
          router.push("/welcome-page")
    }, [])
 

@@ -1,4 +1,4 @@
-export type Household = {
+export type HouseholdData = {
    id: number,
    name: string
 }

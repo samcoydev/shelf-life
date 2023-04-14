@@ -37,7 +37,27 @@ export const UserAPI = {
 
    getUserData: async (_email: string) => {
       return await axios<UserData>({
-         url: URL_BASE + `/${_email}`,
+         url: URL_BASE,
+         headers: {
+            "User-Email": _email
+         }
+       });
+   },
+
+   leaveHousehold: async () => {
+      return await axios<UserData>({
+         method: "put",
+         url: URL_BASE,
+       });
+   },
+
+   getUsersByHouseholdId: async (householdId: string) => {
+      return await axios<UserData[]>({
+         method: "get",
+         url: URL_BASE + "/household",
+         params: {
+            householdId: householdId 
+         }
        });
    }
 }

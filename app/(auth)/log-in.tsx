@@ -17,28 +17,28 @@ type Inputs = {
 
 const Login = () => {  
    const router = useRouter();
-   const { storeUserData, login } = useContext(AuthContext);
+   const { getStoredUserData, userData, forgetUser, login } = useContext(AuthContext);
    const { control, handleSubmit, formState: {errors, isValid} } = useForm({mode: 'onBlur'})
 
    const onSubmit: SubmitHandler<Inputs> = data => {
       login(data.email, data.password)
          .then((session) => {
-            UserAPI.getUserData(data.email).then(response => {
-               console.log("RES: ", response)
-               if (response.status === 200) {
-                  storeUserData(response.data)
-               } else {
-                  console.error("There was a status problem fetching user data for: ", data.email)
-               }
-            }, err => {
-               console.error("There was a problem fetching user data for: ", data.email, err)
-            });
          })
          .catch((err) => {
             alert("Oops, " + err);
             console.error("Failed to log in.", err);
          });
    };
+
+   async function lol() {
+      forgetUser();
+      console.log("INIT WITH userData: ", userData);
+      getStoredUserData().then(res => {
+         console.log("INIT WITH gettingStoredUserData: ", res);
+      }, err => {
+         console.error(err);
+      })
+   }
 
    return (
       <View style={styles.container}>

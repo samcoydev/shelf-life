@@ -1,18 +1,18 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { accentColor } from '../../constants/colors'
+import { AlertData } from '../../types/alert-data'
 
 
-
-const Alert = ({title, color}) => {
+const Alert = ({ alertData, color }: { alertData: AlertData, color: string }) => {
    return (
-      <View style={ styles.container }>
-         <View style={[ styles.colorContainer, { backgroundColor: color} ]}></View>
-         <View style={ styles.textContainer }> 
-            <Text>{title}</Text>
-         </View>
-      </View>
-    );
-};
+     <View style={ styles.container }>
+       <View style={[ styles.colorContainer, { backgroundColor: color} ]}></View>
+       <View style={ styles.textContainer }> 
+         <Text>{alertData.text}</Text>
+       </View>
+     </View>
+   );
+ };
 
 export const styles = StyleSheet.create({
    container: {

@@ -6,28 +6,56 @@ import { textDark, dominantColor, textLight } from '../../constants/colors'
 import { HouseholdAPI } from '../../api/household-api'
 import { useContext } from 'react'
 import { AuthContext } from '../../context/auth'
+import { UserAPI } from '../../api/user-api'
 
 type Inputs = {
    householdName: string,
-   emailRecipient: string,
+   householdRecipient: string,
  };
 
 const CreateHousehold = () => {
    const router = useRouter();
-   const { getStoredUserData } = useContext(AuthContext);
+   const { userData, logout, forgetUser, storeUserData } = useContext(AuthContext);
    const { control, handleSubmit, formState: {errors, isValid} } = useForm({mode: 'onBlur'})
 
-   const onSubmitNewHousehold: SubmitHandler<Inputs> = data => {
-      getStoredUserData().then(email => {
-         HouseholdAPI.postHousehold({id: -1, name: data.householdName}, email);
-         console.log("Attempting to post new household with email: " + email);
+   const onSubmitNewHousehold: SubmitHandler<Inputs> = async data => {
+      await HouseholdAPI.postHousehold({id: -1, name: data.householdName}).then(res => {
+         console.log("successfully posted household ", res);
+         welcomeUser();
       }, err => {
-         console.error("There was a problem getting the users stored data. ", err);
+         console.error("Error posting household ", err);
       });
    }
 
-   const onSubmitRequest: SubmitHandler<Inputs> = data => {
-      console.log("Req");
+   const onSubmitRequest: SubmitHandler<Inputs> = async data => {
+      await HouseholdAPI.requestToJoinHousehold(data.householdRecipient).then(res => {
+         console.log("awaiting request from: ", data.householdRecipient)
+      }, err => {
+         console.error("Error posting household ", data.householdRecipient, err);
+      })
+   }
+
+   const welcomeUser = () => {
+      UserAPI.welcomeUser(userData.email).then(res => {
+         console.log("successfully welcomed user. ", res.data);
+         
+         const newUser = {
+            ...userData
+         }
+
+         newUser.hasBeenWelcomed = true;
+
+         storeUserData(newUser);
+
+         router.push("/tabs/home")
+      }, err => {
+         console.error("Error welcoming user. ", err);
+      });
+   }
+
+   const logUserOut = () => {
+      forgetUser()
+      logout()
    }
 
    return (
@@ -53,7 +81,7 @@ const CreateHousehold = () => {
             <Text style={ styles.buttonText }>Create Household</Text>
          </Pressable>
          
-         <Text style={styles.label}>Email to Request</Text>
+         <Text style={styles.label}>Household Name to Request</Text>
          <Controller
             control={control}
             render={({field: { onChange, onBlur, value }}) => (
@@ -64,11 +92,19 @@ const CreateHousehold = () => {
                   value={value}
                />
             )}
-         name="emailRecipient"
+         name="householdRecipient"
          />
 
          <Pressable style={styles.button} onPress={handleSubmit(onSubmitRequest)}>
             <Text style={ styles.buttonText }>Send Request</Text>
+         </Pressable>
+
+         <Pressable style={styles.button} onPress={handleSubmit(welcomeUser)}>
+            <Text style={ styles.buttonText }>Welcome</Text>
+         </Pressable>
+
+         <Pressable style={styles.button} onPress={handleSubmit(logUserOut)}>
+            <Text style={ styles.buttonText }>Log Out</Text>
          </Pressable>
 
       </View>
