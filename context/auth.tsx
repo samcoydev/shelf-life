@@ -4,18 +4,18 @@ import { AuthenticationDetails, CognitoUser, CognitoUserAttribute, CognitoUserSe
 import { useRouter, useSearchParams, useSegments } from 'expo-router'
 import { createContext, useContext, useEffect, useState } from 'react'
 import UserPool from './UserPool'
-import React from 'react'
 import { ACCESS_STORE_KEY, USER_DATA_STORE_KEY, REFRESH_STORE_KEY } from '@env';
 import { deleteItemAsync, getItemAsync, setItemAsync } from 'expo-secure-store'
 import axios from 'axios'
 import { UserData } from '../types/user-data'
 import { UserAPI } from '../api/user-api'
+import jwtDecode from 'jwt-decode'
 
 function useProtectedRoute(userData) {
    const segments = useSegments();
    const router = useRouter();
  
-   React.useEffect(() => {
+   useEffect(() => {
      const inAuthGroup = segments[0] === "(auth)";
  
       // If the user is not signed in and the initial segment is not anything in the auth group.
@@ -40,12 +40,15 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
    }, [])
 
    const getInitValues = async () => {
-      await getItemAsync(USER_DATA_STORE_KEY).then(data => {
-         console.log("Recieved this data: ", data);
-         setUserData(JSON.parse(data));
-      }, err => {
-         console.error("Got an error recieving data: ", err);
-      })
+      // await getItemAsync(ACCESS_STORE_KEY).then(data => {
+      //    if (data === null) return;
+      //    //console.log("TESTING DECODE: ", jwtDecode(data))
+      // }, err => console.error("error", err))
+
+      // await getItemAsync(USER_DATA_STORE_KEY).then(data => {
+      //    setUserData(data);
+      // }, err => {
+      // })
    }
 
    useProtectedRoute(userData);
@@ -106,6 +109,7 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
    }
 
    const login = async (Username: string, Password: string) => {
+      console.log("Login?")
       return await new Promise<CognitoUserSession>((resolve, reject) => {
          const user = new CognitoUser({
             Username,
@@ -117,11 +121,13 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
             Password
          });
    
+         console.log("Authenticate?")
          user.authenticateUser(authDetails, {
             onSuccess: async (session) => {
                setAccessToken(session.getAccessToken().getJwtToken())
+               console.log("success?")
 
-               await UserAPI.getUserData(Username).then(response => {
+               await UserAPI.getUserData().then(response => {
                   if (response.status === 200) {
                      console.log("Storing user data");
                      storeUserData(response.data)

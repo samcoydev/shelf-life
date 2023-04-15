@@ -35,12 +35,9 @@ export const UserAPI = {
        });
    },
 
-   getUserData: async (_email: string) => {
+   getUserData: async () => {
       return await axios<UserData>({
          url: URL_BASE,
-         headers: {
-            "User-Email": _email
-         }
        });
    },
 

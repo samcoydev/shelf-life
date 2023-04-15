@@ -25,7 +25,7 @@ export const EmptyAlertData = {
 }
 
 const Home = () => {
-   const { userData, getStoredUserData } = useContext(AuthContext);
+   const { userData } = useContext(AuthContext);
    const [ alerts, setAlerts ] = useState(null);
    const [ modalVisible, setModalVisible] = useState(false);
    const [ currentlyVisibleAlert, setCurrentlyVisibleAlert] = useState(EmptyAlertData);
@@ -103,7 +103,7 @@ const AlertModal = ({closeModal, alertData}) => {
                   <Text style={styles.modalHeaderText}>Alert</Text>
                </View>
                <TouchableOpacity onPress={closeModal}>
-                  <Cancel height={20} width={20} />
+                  {/* <Cancel height={20} width={20} /> */}
                </TouchableOpacity>
             </View>
             <Text style={styles.modalText}>{alertData.text}</Text>
