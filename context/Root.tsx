@@ -6,10 +6,12 @@ import { UserAPI } from '../api/user-api'
 
 interface RootContextType {
    user: UserData | null;
+   getUserData: () => void;
 }
 
 export const RootContext = createContext<RootContextType>({
-   user: null
+   user: null,
+   getUserData: () => {}
 })
 
 const ROOT_TAG = "[ROOT] "
@@ -19,29 +21,12 @@ export const RootProvider = (props: { children: React.ReactNode}) => {
    const [ user, setUser ] = useState(null)
 
    useEffect(() => {
-      initApp();
-   }, [])
-
-   const checkForAccessToken = async () => {
-      return await new Promise<string>((resolve, reject) => {
-         getItemAsync(ACCESS_STORE_KEY).then(result => {
-            if (result === null) resolve(null)
-            resolve(result)
-         }, err => {
-            reject(err);
-         })
-      })
-   }
+      if (user !== null)
+         initApp();
+   }, [user])
 
    const initApp = async () => {
 
-      // Check if our access token is stored.
-      const accessToken = await checkForAccessToken();
-      if (accessToken !== null) {
-
-         //await UserAPI.getUserData(accessToken);
-
-      }
       // If this is true, then get our user data from the API and
       // change the state here.
 
@@ -52,8 +37,17 @@ export const RootProvider = (props: { children: React.ReactNode}) => {
       setAppInitialized(true);
    }
 
+   const getUserData = async () => {
+      await UserAPI.getUserData().then(userData => {
+         console.log("User Data: ", userData.data)
+      }, err => {
+         console.error(err)
+      })
+   }
+
    const values = {
-      user
+      user,
+      getUserData
    }
 
    return (

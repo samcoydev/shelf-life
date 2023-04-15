@@ -1,17 +1,15 @@
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 import { StyleSheet, Text, View, TextInput, Button } from 'react-native'
 import { AuthenticationDetails, CognitoUser, CognitoUserAttribute, CognitoUserSession } from 'amazon-cognito-identity-js'
-import { useRouter, useSearchParams, useSegments } from 'expo-router'
+import { useRouter, useSegments } from 'expo-router'
 import { createContext, useContext, useEffect, useState } from 'react'
-import UserPool from './UserPool'
-import { ACCESS_STORE_KEY, USER_DATA_STORE_KEY, REFRESH_STORE_KEY } from '@env';
+import { ACCESS_STORE_KEY } from '@env';
 import { deleteItemAsync, getItemAsync, setItemAsync } from 'expo-secure-store'
 import axios from 'axios'
-import { UserData } from '../types/user-data'
-import { UserAPI } from '../api/user-api'
-import jwtDecode from 'jwt-decode'
+import { ResponseType, makeRedirectUri, useAuthRequest } from 'expo-auth-session'
+import { RootContext } from './Root'
 
-function useProtectedRoute(userData) {
+function useProtectedRoute(accessToken) {
    const segments = useSegments();
    const router = useRouter();
  
@@ -19,156 +17,72 @@ function useProtectedRoute(userData) {
      const inAuthGroup = segments[0] === "(auth)";
  
       // If the user is not signed in and the initial segment is not anything in the auth group.
-      if (!userData && !inAuthGroup) {
+      if (!accessToken && !inAuthGroup) {
          // Redirect to the sign-in page.
          router.replace("/log-in");
-      } else if (userData && inAuthGroup) {
+      } else if (accessToken && inAuthGroup) {
          console.log("User is Authed");
 
          // Redirect away from the sign-in page.
          router.replace("/tabs");
       }
-   }, [userData, segments]);
+   }, [accessToken, segments]);
 }
  
 export const AuthProvider = (props: { children: React.ReactNode }) => {  
+   const { getUserData } = useContext(RootContext);
    const [accessToken, setAccessToken] = useState(null);
-   const [userData, setUserData] = useState(null);
+
+   const discovery = {
+      authorizationEndpoint: "https://coycafe.ddns.net:8080/realms/shelf-life-dev/protocol/openid-connect/auth",
+   };
+
+   const [request, response, promptAsync] = useAuthRequest(
+      {
+         responseType: ResponseType.Token,
+         clientId: 'shelf-life-app',
+         scopes: ['openid', 'profile', 'email'],
+         redirectUri: makeRedirectUri({
+            scheme: 'com.samcodesthings.com'
+         }),
+      },
+      discovery
+   );
 
    useEffect(() => {
-      getInitValues();
-   }, [])
-
-   const getInitValues = async () => {
-      // await getItemAsync(ACCESS_STORE_KEY).then(data => {
-      //    if (data === null) return;
-      //    //console.log("TESTING DECODE: ", jwtDecode(data))
-      // }, err => console.error("error", err))
-
-      // await getItemAsync(USER_DATA_STORE_KEY).then(data => {
-      //    setUserData(data);
-      // }, err => {
-      // })
-   }
-
-   useProtectedRoute(userData);
-
-   const rememberUser = async (sessionData: CognitoUserSession) => {
-      console.log("Remembering User...");
-      await setItemAsync(ACCESS_STORE_KEY, sessionData.getAccessToken().getJwtToken());
-      await setItemAsync(REFRESH_STORE_KEY, sessionData.getRefreshToken().getToken());
-      console.log("User remembered.");
-   }
-
-   const storeUserData = async (userData: UserData) => {
-      setUserData(userData);
-      await deleteItemAsync(USER_DATA_STORE_KEY);
-      await setItemAsync(USER_DATA_STORE_KEY, JSON.stringify(userData));
-   }
-
-   const getStoredUserData = async () => {
-      return await new Promise<string>((resolve, reject) => {
-         getItemAsync(USER_DATA_STORE_KEY).then(response => {
-            resolve(response);
-         }, err => {
-            console.error("There was no stored user data: ", err);
-            reject();
-         }
-      );
-      })
-   }
-
-   const getRememberedUser = async () => {
-      console.log("Get remembered user");
-      return await getItemAsync(ACCESS_STORE_KEY);
-   }
-
-   const forgetUser = async () => {
-      await deleteItemAsync(ACCESS_STORE_KEY)
-      await deleteItemAsync(USER_DATA_STORE_KEY)
-      setUserData(null);
-      console.log("User forgotten.");
-   }
-
-   const getSession = async () => {
-      return await new Promise<CognitoUserSession>((resolve, reject) => {
-         const user = UserPool.getCurrentUser();
-   
-         if (user) {
-            user.getSession((err, session) => {
-               if (err) {
-                  reject();
-               } else {
-                  resolve(session);
-               }
-            });
-         } else {
-            reject();
-         }
-      })
-   }
-
-   const login = async (Username: string, Password: string) => {
-      console.log("Login?")
-      return await new Promise<CognitoUserSession>((resolve, reject) => {
-         const user = new CognitoUser({
-            Username,
-            Pool: UserPool,
-         });
-   
-         const authDetails = new AuthenticationDetails({
-            Username,
-            Password
-         });
-   
-         console.log("Authenticate?")
-         user.authenticateUser(authDetails, {
-            onSuccess: async (session) => {
-               setAccessToken(session.getAccessToken().getJwtToken())
-               console.log("success?")
-
-               await UserAPI.getUserData().then(response => {
-                  if (response.status === 200) {
-                     console.log("Storing user data");
-                     storeUserData(response.data)
-                     rememberUser(session)
-                     resolve(session);
-                  } else {
-                     console.error("There was a status problem fetching user data for: ", Username)
-                     reject();
-                  }
-               }, err => {
-                  console.error("There was a problem fetching user data for: ", Username, err)
-                  reject(err);
-               });
-
-            },
-            onFailure: (err) => {
-               console.error("Failed. ", err);
-               reject(err);
-            },
-         })
-      })
-   };
-   
-   const logout = () => {
-      const user = UserPool.getCurrentUser();
-      if (user) {
-         user.signOut();
-         setAccessToken(null);
-         console.log("Signed out");
-         return;
+      if (response && response.type === 'success') {
+         setAccessToken(response.authentication.accessToken)
+         setItemAsync(ACCESS_STORE_KEY, JSON.stringify(accessToken));
+         getUserData()
       }
-      console.log("Already signed out");
+   }, [response])
+
+   useEffect(() => {
+      if (request !== null)
+         getAccessToken();
+   }, [request])
+
+   useProtectedRoute(accessToken);
+
+   
+   const getAccessToken = async () => {
+      // First check if token exists
+      
+      promptAsync();
+      // const storedToken = await getItemAsync(ACCESS_STORE_KEY);
+      // if (storedToken !== null) {
+      //    console.log("Found token stored")
+      //    setAccessToken(storedToken)
+      //    getUserData()
+      // } else {
+      //    console.log("Could not find token stored")
+      // }
    }
 
    axios.interceptors.request.use(
       config => {
          if (accessToken)
             config.headers['Authorization'] = 'Bearer ' + accessToken
-         if (userData) {
-            config.headers['User-Email'] = userData.email;
-         }
    
          config.headers['Content-Type'] = "application/json"
          return config;
@@ -179,17 +93,7 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
    )
 
    const value = {
-      getSession,
-      login,
-      logout,
-      rememberUser,
-      storeUserData,
-      getStoredUserData,
-      getRememberedUser,
-      forgetUser,
-      userData,
-      accessToken,
-      setAccessToken
+      accessToken
    }
  
    return (
@@ -202,29 +106,9 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
 
 
 interface AuthContextType {
-   getSession: () => Promise<CognitoUserSession>,
-   login: (username: string, password: string) => Promise<CognitoUserSession>,
-   logout: () => void,
-   rememberUser: (sessionData: CognitoUserSession) => void;
-   storeUserData: (userData: UserData) => void;
-   getStoredUserData: () => Promise<string>;
-   getRememberedUser: () => Promise<string>;
-   forgetUser: () => void;
-   userData: UserData | null;
    accessToken: string | null;
-   setAccessToken: (accessToken: string | null) => void;
 }
 
 export const AuthContext = createContext<AuthContextType>({
-   getSession: () => Promise.reject(),
-   login: (username: string, password: string) => Promise.reject(),
-   logout: () => {},
-   rememberUser: (sessionData: CognitoUserSession) => {},
-   storeUserData: (userData: UserData) => {},
-   getStoredUserData: () => Promise.reject(),
-   getRememberedUser: () => Promise.reject(),
-   forgetUser: () => {},
-   userData: null,
    accessToken: null,
-   setAccessToken: () => {},
 });

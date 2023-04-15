@@ -25,7 +25,7 @@
         "backgroundColor": "#ffffff"
       }
     },
-    "scheme": "com.samcodesthings.shelflife://oauth2redirect",
+    "scheme": "com.samcodesthings.shelflife",
     "web": {
       "bundler": "metro",
       "favicon": "./assets/favicon.png"

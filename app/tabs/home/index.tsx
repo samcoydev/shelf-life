@@ -8,6 +8,7 @@ import { AlertData } from '../../../types/alert-data'
 import { AuthContext } from '../../../context/auth'
 import HeaderText from '../../../components/shared/HeaderText'
 import { BorderBottom, Cancel } from 'iconoir-react-native'
+import { RootContext } from '../../../context/Root'
 
 enum AlertTypeEnum {
    REQUEST = "Request",
@@ -25,7 +26,7 @@ export const EmptyAlertData = {
 }
 
 const Home = () => {
-   const { userData } = useContext(AuthContext);
+   const { user } = useContext(RootContext);
    const [ alerts, setAlerts ] = useState(null);
    const [ modalVisible, setModalVisible] = useState(false);
    const [ currentlyVisibleAlert, setCurrentlyVisibleAlert] = useState(EmptyAlertData);
@@ -35,7 +36,7 @@ const Home = () => {
    }, [])
 
    const initWithUserData = async () => {
-      if (!userData) {
+      if (!user) {
          return;
       }
 

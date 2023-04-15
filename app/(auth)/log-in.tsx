@@ -17,28 +17,13 @@ type Inputs = {
 
 const Login = () => {  
    const router = useRouter();
-   const { getStoredUserData, userData, forgetUser, login } = useContext(AuthContext);
    const { control, handleSubmit, formState: {errors, isValid} } = useForm({mode: 'onBlur'})
 
    const onSubmit: SubmitHandler<Inputs> = data => {
-      console.log("submitting")
-      login(data.email, data.password)
-         .then((session) => {
-         })
-         .catch((err) => {
-            alert("Oops, " + err);
-            console.error("Failed to log in.", err);
-         });
+      console.log("")
    };
 
    async function lol() {
-      forgetUser();
-      console.log("INIT WITH userData: ", userData);
-      getStoredUserData().then(res => {
-         console.log("INIT WITH gettingStoredUserData: ", JSON.parse(res));
-      }, err => {
-         console.error(err);
-      })
    }
 
    return (
