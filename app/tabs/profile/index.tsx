@@ -1,4 +1,4 @@
-import { Button, StyleSheet, Text, View } from 'react-native'
+import { Button, Pressable, StyleSheet, Text, View } from 'react-native'
 import { AuthContext } from '../../../context/auth'
 import { useContext } from 'react'
 import { ShoppingListAPI } from '../../../api/shopping-list-api'
@@ -7,16 +7,13 @@ import axios from 'axios';
 import { UserAPI } from '../../../api/user-api'
 import { useRouter } from 'expo-router'
 import { useEffect } from 'react';
+import { RootContext } from '../../../context/Root'
 
 
 const Profile = () => {
    const router = useRouter();
-   const { forgetUser, logout, userData } = useContext(AuthContext);
-
-   const onSubmit = () => {
-      forgetUser();
-      logout();
-   };
+   const { user } = useContext(RootContext);
+   const { logout } = useContext(AuthContext);
 
    const leaveHousehold = async () => {
       await UserAPI.leaveHousehold().then(res => {
@@ -26,11 +23,12 @@ const Profile = () => {
    }
    
    const getUsers = () => {
-      console.log(userData);
-
-      UserAPI.getUsersByHouseholdId(userData.household_id.id).then(data => {
-         console.log("Got users by household: ", data.data);
-      }, err => console.error("Error getting users by household: ", err));
+      if (user) {
+   
+         UserAPI.getUsersByHouseholdId(user.householdId).then(data => {
+            //console.log("Got users by household: ", data.data);
+         }, err => console.error("Error getting users by household: ", err));
+      }
    }
 
    useEffect(() => {
@@ -42,20 +40,13 @@ const Profile = () => {
          <View style={ styles.areaView }>
             <Text>profile</Text>
 
-            <View style={styles.button}>
-               <Button
-                  title="Log Out"
-                  onPress={() => onSubmit()}
-               />
-            </View>
-
+            <Pressable style={styles.button} onPress={logout}>
+               <Text style={ styles.buttonText }>Log Out</Text>
+            </Pressable>
             
-            <View style={styles.button}>
-               <Button
-                  title="Leave Household"
-                  onPress={() => leaveHousehold()}
-               />
-            </View>
+            <Pressable style={styles.button} onPress={leaveHousehold}>
+               <Text style={ styles.buttonText }>Leave Household</Text>
+            </Pressable>
          </View>
       </View>
     );
@@ -71,6 +62,9 @@ const styles = StyleSheet.create({
       height: 40,
       backgroundColor: dominantColor,
       borderRadius: 4,
+   },
+   buttonText: {
+      color: "white",
    },
    header: {
       justifyContent: 'center',

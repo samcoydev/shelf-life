@@ -1,15 +1,13 @@
-import { Controller, SubmitHandler, useForm } from 'react-hook-form'
-import { StyleSheet, Text, View, TextInput, Button } from 'react-native'
-import { AuthenticationDetails, CognitoUser, CognitoUserAttribute, CognitoUserSession } from 'amazon-cognito-identity-js'
+import { Platform } from 'react-native'
 import { useRouter, useSegments } from 'expo-router'
 import { createContext, useContext, useEffect, useState } from 'react'
 import { ACCESS_STORE_KEY } from '@env';
-import { deleteItemAsync, getItemAsync, setItemAsync } from 'expo-secure-store'
+import { setItemAsync } from 'expo-secure-store'
 import axios from 'axios'
-import { ResponseType, makeRedirectUri, useAuthRequest } from 'expo-auth-session'
+import { ResponseType, TokenTypeHint, dismiss, makeRedirectUri, revokeAsync, useAuthRequest } from 'expo-auth-session'
 import { RootContext } from './Root'
 
-function useProtectedRoute(accessToken) {
+function useProtectedRoute(bearerToken) {
    const segments = useSegments();
    const router = useRouter();
  
@@ -17,24 +15,26 @@ function useProtectedRoute(accessToken) {
      const inAuthGroup = segments[0] === "(auth)";
  
       // If the user is not signed in and the initial segment is not anything in the auth group.
-      if (!accessToken && !inAuthGroup) {
+      if (!bearerToken && !inAuthGroup) {
          // Redirect to the sign-in page.
          router.replace("/log-in");
-      } else if (accessToken && inAuthGroup) {
+      } else if (bearerToken && inAuthGroup) {
          console.log("User is Authed");
 
          // Redirect away from the sign-in page.
          router.replace("/tabs");
       }
-   }, [accessToken, segments]);
+   }, [bearerToken, segments]);
 }
  
 export const AuthProvider = (props: { children: React.ReactNode }) => {  
    const { getUserData } = useContext(RootContext);
-   const [accessToken, setAccessToken] = useState(null);
+   const [ bearerToken, setBearerToken ] = useState(null);
+   const [ accessToken, setAccessToken ] = useState(null);
 
    const discovery = {
       authorizationEndpoint: "https://coycafe.ddns.net:8080/realms/shelf-life-dev/protocol/openid-connect/auth",
+      revocationEndpoint: "https://coycafe.ddns.net:8080/realms/shelf-life-dev/protocol/openid-connect/logout",
    };
 
    const [request, response, promptAsync] = useAuthRequest(
@@ -50,10 +50,16 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
    );
 
    useEffect(() => {
-      if (response && response.type === 'success') {
-         setAccessToken(response.authentication.accessToken)
-         setItemAsync(ACCESS_STORE_KEY, JSON.stringify(accessToken));
+      if (bearerToken !== null)
          getUserData()
+   }, [bearerToken])
+
+   useEffect(() => {
+      if (response && response.type === 'success') {
+         setBearerToken(response.authentication.accessToken)
+         setAccessToken(response.authentication)
+         console.log(response.authentication)
+         setItemAsync(ACCESS_STORE_KEY, JSON.stringify(bearerToken));
       }
    }, [response])
 
@@ -62,29 +68,33 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
          getAccessToken();
    }, [request])
 
-   useProtectedRoute(accessToken);
+   useProtectedRoute(bearerToken);
 
    
    const getAccessToken = async () => {
-      // First check if token exists
-      
       promptAsync();
-      // const storedToken = await getItemAsync(ACCESS_STORE_KEY);
-      // if (storedToken !== null) {
-      //    console.log("Found token stored")
-      //    setAccessToken(storedToken)
-      //    getUserData()
-      // } else {
-      //    console.log("Could not find token stored")
-      // }
    }
+
+   const logout = async () => {
+      if (!bearerToken) console.error("Not logged in.")
+      if (discovery.revocationEndpoint) {
+         await revokeAsync({ token: bearerToken, tokenTypeHint: TokenTypeHint.AccessToken }, discovery)
+         .catch((e) => console.error(e));
+         // .then(data => { 
+         //    console.log(data) 
+         //    setBearerToken(null)
+         //    setAccessToken(null);
+         // }, err => console.error(err))
+      }
+    }
 
    axios.interceptors.request.use(
       config => {
-         if (accessToken)
-            config.headers['Authorization'] = 'Bearer ' + accessToken
+         if (bearerToken)
+            config.headers['Authorization'] = 'Bearer ' + bearerToken
    
          config.headers['Content-Type'] = "application/json"
+
          return config;
       },
       error => {
@@ -93,7 +103,9 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
    )
 
    const value = {
-      accessToken
+      bearerToken,
+      getAccessToken,
+      logout
    }
  
    return (
@@ -103,12 +115,14 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
    );
 };
 
-
-
 interface AuthContextType {
-   accessToken: string | null;
+   bearerToken: string | null;
+   getAccessToken: () => void;
+   logout: () => void;
 }
 
 export const AuthContext = createContext<AuthContextType>({
-   accessToken: null,
+   bearerToken: null,
+   getAccessToken: () => {},
+   logout: () => {}
 });

@@ -17,54 +17,15 @@ type Inputs = {
 
 const Login = () => {  
    const router = useRouter();
-   const { control, handleSubmit, formState: {errors, isValid} } = useForm({mode: 'onBlur'})
-
-   const onSubmit: SubmitHandler<Inputs> = data => {
-      console.log("")
-   };
-
-   async function lol() {
-   }
+   const { getAccessToken } = useContext(AuthContext)
 
    return (
       <View style={styles.container}>
-         <HeaderText>Log In</HeaderText>
+         <Text style={styles.headerText}>Shelf Life</Text>
 
-         <Text style={styles.label}>Email</Text>
-         <Controller
-            control={control}
-            render={({field: { onChange, onBlur, value }}) => (
-               <TextInput
-                  style={styles.input}
-                  onBlur={onBlur}
-                  onChangeText={value => onChange(value)}
-                  value={value}
-               />
-            )}
-            name="email"
-            rules={{ required: true }}
-         />
-         
-         <Text style={styles.label}>Password</Text>
-         <Controller
-            control={control}
-            render={({field: { onChange, onBlur, value }}) => (
-               <TextInput
-                  style={styles.input}
-                  onBlur={onBlur}
-                  onChangeText={value => onChange(value)}
-                  value={value}
-               />
-            )}
-         name="password"
-         rules={{ required: true }}
-         />
-
-         <Pressable style={styles.button} onPress={handleSubmit(onSubmit)}>
-            <Text style={ styles.buttonText }>Log In</Text>
+         <Pressable style={styles.button} onPress={getAccessToken}>
+            <Text style={ styles.buttonText }>Log In With Email</Text>
          </Pressable>
-
-         <Link style={ styles.label } href="/sign-up">Sign Up</Link>
 
       </View>
    )
@@ -75,6 +36,11 @@ const styles = StyleSheet.create({
      color: textDark,
      margin: 20,
      marginLeft: 0,
+   },
+   headerText: {
+      fontSize: 32,
+      color: textDark,
+      paddingBottom: 50
    },
    button: {
       flexDirection: "row",
@@ -94,6 +60,7 @@ const styles = StyleSheet.create({
    container: {
      flex: 1,
      justifyContent: 'center',
+     alignItems: "center",
      paddingTop: 10,
      padding: 8,
      backgroundColor: 'white',
