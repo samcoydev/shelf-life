@@ -1,11 +1,11 @@
-import { Platform } from 'react-native'
 import { useRouter, useSegments } from 'expo-router'
 import { createContext, useContext, useEffect, useState } from 'react'
-import { ACCESS_STORE_KEY } from '@env';
+import { ACCESS_STORE_KEY, AUTH_ENDPOINT, CLIENT_ID } from '@env';
 import { setItemAsync } from 'expo-secure-store'
 import axios from 'axios'
-import { ResponseType, TokenTypeHint, dismiss, makeRedirectUri, revokeAsync, useAuthRequest } from 'expo-auth-session'
+import { ResponseType, makeRedirectUri, useAuthRequest } from 'expo-auth-session'
 import { RootContext } from './Root'
+import { UserAPI } from '../api/user-api'
 
 function useProtectedRoute(bearerToken) {
    const segments = useSegments();
@@ -30,17 +30,15 @@ function useProtectedRoute(bearerToken) {
 export const AuthProvider = (props: { children: React.ReactNode }) => {  
    const { getUserData } = useContext(RootContext);
    const [ bearerToken, setBearerToken ] = useState(null);
-   const [ accessToken, setAccessToken ] = useState(null);
 
    const discovery = {
-      authorizationEndpoint: "https://coycafe.ddns.net:8080/realms/shelf-life-dev/protocol/openid-connect/auth",
-      revocationEndpoint: "https://coycafe.ddns.net:8080/realms/shelf-life-dev/protocol/openid-connect/logout",
+      authorizationEndpoint: AUTH_ENDPOINT,
    };
 
    const [request, response, promptAsync] = useAuthRequest(
       {
          responseType: ResponseType.Token,
-         clientId: 'shelf-life-app',
+         clientId: CLIENT_ID,
          scopes: ['openid', 'profile', 'email'],
          redirectUri: makeRedirectUri({
             scheme: 'com.samcodesthings.com'
@@ -50,15 +48,15 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
    );
 
    useEffect(() => {
+      console.log(bearerToken);
       if (bearerToken !== null)
          getUserData()
    }, [bearerToken])
 
    useEffect(() => {
       if (response && response.type === 'success') {
+         console.log("Setting token to: " + response.authentication.accessToken)
          setBearerToken(response.authentication.accessToken)
-         setAccessToken(response.authentication)
-         console.log(response.authentication)
          setItemAsync(ACCESS_STORE_KEY, JSON.stringify(bearerToken));
       }
    }, [response])
@@ -67,25 +65,16 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
       if (request !== null)
          getAccessToken();
    }, [request])
-
-   useProtectedRoute(bearerToken);
-
    
    const getAccessToken = async () => {
       promptAsync();
    }
 
    const logout = async () => {
-      if (!bearerToken) console.error("Not logged in.")
-      if (discovery.revocationEndpoint) {
-         await revokeAsync({ token: bearerToken, tokenTypeHint: TokenTypeHint.AccessToken }, discovery)
-         .catch((e) => console.error(e));
-         // .then(data => { 
-         //    console.log(data) 
-         //    setBearerToken(null)
-         //    setAccessToken(null);
-         // }, err => console.error(err))
-      }
+      UserAPI.logout().then(res => {
+            setBearerToken(null)
+         }, err => {console.error(err)}
+      )
     }
 
    axios.interceptors.request.use(
@@ -101,6 +90,8 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
          Promise.reject(error)
       }
    )
+   
+   useProtectedRoute(bearerToken);
 
    const value = {
       bearerToken,

@@ -27,6 +27,9 @@ export const HouseholdAPI = {
 
    requestToJoinHousehold: async (householdName: string) => {
       console.log("Household name requesting: ", householdName);
-      return await axios.post(URL_BASE + '/request', householdName);
+      return await axios({
+         url: URL_BASE + `/request/${householdName}`,
+         method: 'post'
+      })
    }
 }

@@ -56,5 +56,12 @@ export const UserAPI = {
             householdId: householdId 
          }
        });
+   },
+
+   logout: async () => {
+      return await axios({
+         method: "post",
+         url: URL_BASE + "/logout",
+      })
    }
 }

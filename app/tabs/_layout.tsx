@@ -5,15 +5,18 @@ import { Pressable, StyleSheet, Text } from 'react-native'
 import { ctaColor, dominantColor, textDark, textLight } from '../../constants/colors'
 import { AuthContext } from '../../context/auth'
 import { useContext, useEffect } from 'react'
+import { RootContext } from '../../context/Root'
 
 export default function AppLayout() {
    const router = useRouter();
-   const { userData } = useContext(AuthContext);
+   const { user } = useContext(RootContext);
 
    useEffect(() => {
-      if (userData && !userData.hasBeenWelcomed)
+      if (user && !user.hasBeenWelcomed) {
+         console.log("Checking user: ", user.email, user.hasBeenWelcomed);
          router.push("/welcome-page")
-   }, [])
+      }
+   }, [user])
 
    return (
       <ThemeProvider theme={theme}>

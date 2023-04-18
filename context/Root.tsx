@@ -7,11 +7,13 @@ import { UserAPI } from '../api/user-api'
 interface RootContextType {
    user: UserData | null;
    getUserData: () => void;
+   setUser: (user: UserData) => void;
 }
 
 export const RootContext = createContext<RootContextType>({
    user: null,
-   getUserData: () => {}
+   getUserData: () => {},
+   setUser: (user: UserData) => {}
 })
 
 const ROOT_TAG = "[ROOT] "
@@ -39,7 +41,9 @@ export const RootProvider = (props: { children: React.ReactNode}) => {
 
    const getUserData = async () => {
       await UserAPI.getUserData().then(userData => {
-         setUser(userData)
+         console.log(ROOT_TAG + " got: ", userData.data);
+         setUser(userData.data)
+         console.log(ROOT_TAG + " user: ", user);
       }, err => {
          console.error(err)
       })
@@ -47,7 +51,8 @@ export const RootProvider = (props: { children: React.ReactNode}) => {
 
    const values = {
       user,
-      getUserData
+      getUserData,
+      setUser
    }
 
    return (

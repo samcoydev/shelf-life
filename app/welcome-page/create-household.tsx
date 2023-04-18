@@ -7,6 +7,7 @@ import { HouseholdAPI } from '../../api/household-api'
 import { useContext } from 'react'
 import { AuthContext } from '../../context/auth'
 import { UserAPI } from '../../api/user-api'
+import { RootContext } from '../../context/Root'
 
 type Inputs = {
    householdName: string,
@@ -15,11 +16,13 @@ type Inputs = {
 
 const CreateHousehold = () => {
    const router = useRouter();
-   const { userData, logout, forgetUser, storeUserData } = useContext(AuthContext);
+   const { user, setUser } = useContext(RootContext);
+   const { logout } = useContext(AuthContext);
    const { control, handleSubmit, formState: {errors, isValid} } = useForm({mode: 'onBlur'})
 
    const onSubmitNewHousehold: SubmitHandler<Inputs> = async data => {
-      await HouseholdAPI.postHousehold({id: -1, name: data.householdName}).then(res => {
+      const cleanedName = data.householdName.replace(" ", "_");
+      await HouseholdAPI.postHousehold({id: -1, name: cleanedName}).then(res => {
          console.log("successfully posted household ", res);
          welcomeUser();
       }, err => {
@@ -36,26 +39,21 @@ const CreateHousehold = () => {
    }
 
    const welcomeUser = () => {
-      UserAPI.welcomeUser(userData.email).then(res => {
+      UserAPI.welcomeUser(user.email).then(res => {
          console.log("successfully welcomed user. ", res.data);
          
          const newUser = {
-            ...userData
+            ...user
          }
 
          newUser.hasBeenWelcomed = true;
 
-         storeUserData(newUser);
+         setUser(newUser);
 
          router.push("/tabs/home")
       }, err => {
          console.error("Error welcoming user. ", err);
       });
-   }
-
-   const logUserOut = () => {
-      forgetUser()
-      logout()
    }
 
    return (
@@ -103,7 +101,7 @@ const CreateHousehold = () => {
             <Text style={ styles.buttonText }>Welcome</Text>
          </Pressable>
 
-         <Pressable style={styles.button} onPress={handleSubmit(logUserOut)}>
+         <Pressable style={styles.button} onPress={handleSubmit(logout)}>
             <Text style={ styles.buttonText }>Log Out</Text>
          </Pressable>
 
