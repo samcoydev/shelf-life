@@ -4,7 +4,7 @@ import Header from '../../../../components/HomeHeader'
 import { primaryColor } from '../../../../constants/colors'
 
 
-const SettingsLayout = () => {
+const Settings = () => {
    return (
       <View style={ styles.container }>
          <View style={ styles.areaView }>
@@ -31,4 +31,4 @@ const styles = StyleSheet.create({
    }
 });
 
-export default SettingsLayout;
+export default Settings;

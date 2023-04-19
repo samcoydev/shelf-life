@@ -1,14 +1,14 @@
 import { Modal, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import Alert from '../../../components/shared/Alert'
 import Container from '../../../components/shared/Container'
-import { dominantColor, error, primaryColor, success, textDark, warn } from '../../../constants/colors'
+import { error, success, textDark } from '../../../constants/colors'
 import { useContext, useEffect, useState } from 'react'
-import { AlertsAPI } from '../../../api/alerts-api'
 import { AlertData } from '../../../types/alert-data'
-import { AuthContext } from '../../../context/auth'
-import HeaderText from '../../../components/shared/HeaderText'
-import { BorderBottom, Cancel } from 'iconoir-react-native'
 import { RootContext } from '../../../context/Root'
+import { UserAPI } from '../../../api/user-api'
+import { HouseholdAPI } from '../../../api/household-api'
+import { Cancel } from 'iconoir-react-native'
+import { AuthContext } from '../../../context/auth'
 
 enum AlertTypeEnum {
    REQUEST = "Request",
@@ -27,20 +27,21 @@ export const EmptyAlertData = {
 
 const Home = () => {
    const { user } = useContext(RootContext);
+   const { logout } = useContext(AuthContext)
    const [ alerts, setAlerts ] = useState(null);
    const [ modalVisible, setModalVisible] = useState(false);
    const [ currentlyVisibleAlert, setCurrentlyVisibleAlert] = useState(EmptyAlertData);
 
    useEffect(() => {
       initWithUserData();
-   }, [])
+   }, [user])
 
    const initWithUserData = async () => {
       if (!user) {
          return;
       }
 
-      AlertsAPI.getHouseholdAlerts().then(response => {
+      UserAPI.getUserAlerts().then(response => {
          if (response.status === 200) {
             console.log("Found data: ", response.data);
             setAlerts(response.data);     
@@ -59,7 +60,7 @@ const Home = () => {
          <ScrollView style={ styles.scrollContainer } contentContainerStyle={{ alignItems: "center" }}>
             <View style={ styles.headerContainer }>
                <Text style={ styles.headingText }>Dashboard</Text>
-               <Text style={ styles.subtitleText }>Welcome User</Text>
+               <Text style={ styles.subtitleText }>Welcome, {user ? user.firstName : "User"}</Text>
             </View>
 
             {alerts ? alerts.map((alert: AlertData, index)=>{
@@ -89,9 +90,17 @@ const Home = () => {
 const AlertModal = ({closeModal, alertData}) => {
 
    const respond = async (didAccept: boolean) => {
-      await AlertsAPI.respondToRequest(alertData.id, didAccept).then(res => {
-         console.log("Responded");
-      }, err => console.error("There was a problem. ", err));
+      if (alertData.householdRequestId !== null) {
+         console.log("Household Request")
+         await HouseholdAPI.respondToHouseholdRequest(alertData.id, didAccept).then(res => {
+            console.log("Responded to household request: ", alertData, didAccept);
+         }, err => console.error("There was a problem: ", err));
+      } else if (alertData.friendRequestId !== null) {
+         console.log("Friend Request")
+         await UserAPI.respondToFriendRequest(alertData.id, didAccept).then(res => {
+            console.log("Responded to friend request: ", alertData, didAccept);
+         }, err => console.error("There was a problem: ", err));
+      }
       
       closeModal();
    }
@@ -104,7 +113,7 @@ const AlertModal = ({closeModal, alertData}) => {
                   <Text style={styles.modalHeaderText}>Alert</Text>
                </View>
                <TouchableOpacity onPress={closeModal}>
-                  {/* <Cancel height={20} width={20} /> */}
+                  <Cancel height={20} width={20} />
                </TouchableOpacity>
             </View>
             <Text style={styles.modalText}>{alertData.text}</Text>

@@ -1,8 +1,10 @@
 export type AlertData = {
    id: string;
    text: string;
-   alerted_household_id: string;
+   alertedHouseholdId?: string;
+   alertedUserId?: string;
    expiration: Date;
    alertType: AlertTypeEnum;
-   household_request_id?: string;
+   householdRequestId?: string;
+   friendRequestId?: string;
 }

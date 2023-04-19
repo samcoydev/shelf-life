@@ -32,7 +32,7 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
    const [ bearerToken, setBearerToken ] = useState(null);
 
    const discovery = {
-      authorizationEndpoint: AUTH_ENDPOINT,
+      authorizationEndpoint: AUTH_ENDPOINT
    };
 
    const [request, response, promptAsync] = useAuthRequest(
@@ -67,7 +67,8 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
    }, [request])
    
    const getAccessToken = async () => {
-      promptAsync();
+      console.log(discovery);
+      promptAsync().then(() => {}, err => console.error("Error was: ", err));
    }
 
    const logout = async () => {

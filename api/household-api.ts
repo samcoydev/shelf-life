@@ -1,6 +1,7 @@
 import { API_URL } from '@env'
 import axios from 'axios'
 import { HouseholdData } from '../types/household-data'
+import { AlertData } from '../types/alert-data'
 
 const URL_BASE = API_URL + "/household"
 
@@ -17,19 +18,29 @@ export const HouseholdAPI = {
       )
    },
 
-   postHousehold: async (householdDTO: HouseholdData) => {
-      const res = await axios({
+   saveHousehold: async (householdDTO: HouseholdData) => {
+      return await axios({
          method: 'post',
          url: URL_BASE,
          data: { ...householdDTO },
        });
    },
-
+   
    requestToJoinHousehold: async (householdName: string) => {
-      console.log("Household name requesting: ", householdName);
       return await axios({
+         method: 'post',
          url: URL_BASE + `/request/${householdName}`,
-         method: 'post'
       })
-   }
+   },
+
+   respondToHouseholdRequest: async (alertId: string, didAccept: boolean) => {
+      return await axios({
+         method: 'post',
+         url: URL_BASE + '/request/action',
+         data: {
+            alertId,
+            didAccept
+         },
+      })
+   },
 }

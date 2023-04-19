@@ -1,6 +1,7 @@
 import { API_URL } from '@env'
 import axios from 'axios'
 import { UserData } from '../types/user-data'
+import { AlertData } from '../types/alert-data'
 
 const URL_BASE = API_URL + "/user"
 
@@ -16,6 +17,51 @@ export const UserAPI = {
          }
       )
    },
+   
+   getUserData: async () => {
+      return await axios<UserData>({
+         url: URL_BASE,
+       });
+   },
+
+   logout: async () => {
+      return await axios({
+         method: "post",
+         url: URL_BASE + "/logout",
+      })
+   },
+
+   getUsersFriends: async () => {
+      return await axios<UserData[]>({
+         method: "get",
+         url: URL_BASE + "/friends"
+      })
+   },
+
+   sendFriendRequest: async (email: string) => {
+      return await axios({
+         method: "post",
+         url: URL_BASE + `/friends/${email}`
+      })
+   },
+
+   respondToFriendRequest: async (alertId: string, didAccept: boolean) => {
+      return await axios({
+         method: "post",
+         url: URL_BASE + '/friends/action',
+         data: {
+            alertId,
+            didAccept
+         }
+      })
+   },
+
+   getUsersByHouseholdId: async (householdId: string) => {
+      return await axios<UserData[]>({
+         method: "get",
+         url: URL_BASE + `/household/${householdId}`
+       });
+   },
 
    welcomeUser: async (email: string) => {
       return await axios({
@@ -27,41 +73,18 @@ export const UserAPI = {
        });
    },
 
-   postUserData: async (userData: UserData) => {
-      return await axios<UserData>({
-         method: 'post',
-         url: URL_BASE + "/register",
-         data: { ...userData }
-       });
-   },
-
-   getUserData: async () => {
-      return await axios<UserData>({
-         url: URL_BASE,
-       });
-   },
-
    leaveHousehold: async () => {
       return await axios<UserData>({
          method: "put",
-         url: URL_BASE,
+         url: URL_BASE + "/household/leave",
        });
    },
 
-   getUsersByHouseholdId: async (householdId: string) => {
-      return await axios<UserData[]>({
-         method: "get",
-         url: URL_BASE + "/household",
-         params: {
-            householdId: householdId 
-         }
-       });
-   },
-
-   logout: async () => {
-      return await axios({
-         method: "post",
-         url: URL_BASE + "/logout",
+   getUserAlerts: async () => {
+      return await axios<AlertData[]>({
+         method: 'get',
+         url: URL_BASE + "/alerts",
       })
-   }
+   },
+
 }

@@ -4,7 +4,6 @@ import { accentColor, dominantColor, textDark, textLight } from '../../constants
 import HeaderText from '../../components/shared/HeaderText'
 import { AuthenticationDetails, CognitoUser, CognitoUserAttribute } from 'amazon-cognito-identity-js'
 import { Link, useRouter, useSearchParams } from 'expo-router'
-import UserPool from '../../context/UserPool'
 import { useContext, useEffect } from "react"
 import { AuthContext } from '../../context/auth'
 import { UserAPI } from '../../api/user-api'

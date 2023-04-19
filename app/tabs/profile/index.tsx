@@ -2,12 +2,13 @@ import { Button, Pressable, StyleSheet, Text, View } from 'react-native'
 import { AuthContext } from '../../../context/auth'
 import { useContext } from 'react'
 import { ShoppingListAPI } from '../../../api/shopping-list-api'
-import { dominantColor } from '../../../constants/colors'
+import { dominantColor, primaryColor, textDark, textLight } from '../../../constants/colors'
 import axios from 'axios';
 import { UserAPI } from '../../../api/user-api'
 import { useRouter } from 'expo-router'
 import { useEffect } from 'react';
 import { RootContext } from '../../../context/Root'
+import { Group, Home, HomeAlt, HomeUser, Settings, User } from 'iconoir-react-native'
 
 
 const Profile = () => {
@@ -15,38 +16,41 @@ const Profile = () => {
    const { user } = useContext(RootContext);
    const { logout } = useContext(AuthContext);
 
-   const leaveHousehold = async () => {
-      await UserAPI.leaveHousehold().then(res => {
-         console.log("Left household.");
-         router.push("/welcome-page")
-      })
-   }
-   
-   const getUsers = () => {
-      if (user) {
-   
-         UserAPI.getUsersByHouseholdId(user.householdId).then(data => {
-            //console.log("Got users by household: ", data.data);
-         }, err => console.error("Error getting users by household: ", err));
-      }
-   }
-
-   useEffect(() => {
-      getUsers();
-   }, [])
-
    return (
       <View style={ styles.container }>
          <View style={ styles.areaView }>
-            <Text>profile</Text>
+            <View style={ styles.avatar }>
+               <User style={{alignSelf: "center", marginTop: 8}} height={100} width={100} />
+            </View>
 
-            <Pressable style={styles.button} onPress={logout}>
-               <Text style={ styles.buttonText }>Log Out</Text>
-            </Pressable>
-            
-            <Pressable style={styles.button} onPress={leaveHousehold}>
-               <Text style={ styles.buttonText }>Leave Household</Text>
-            </Pressable>
+            <View style={styles.profileNameContainer }>
+               <Text style={styles.nameText}>{user.firstName} {user.lastName}</Text>
+               <Text style={{ color: textLight }}>{user.email}</Text>
+            </View>
+
+            <View style={ styles.buttonContainer }>
+               <Pressable style={styles.button}  onPress={() => router.push("/tabs/profile/household")}>
+                  <Home style={{marginLeft: 15}} height={35} width={35} />
+                  <Text style={ styles.buttonText }>Household</Text>
+               </Pressable>
+               
+               <Pressable style={styles.button} onPress={() => router.push("/tabs/profile/friends")}>
+                  <Group style={{marginLeft: 15}} height={35} width={35} />
+                  <Text style={ styles.buttonText }>Friends</Text>
+               </Pressable>
+            </View>
+
+            <View style={ styles.buttonContainer }>
+               <Pressable style={styles.button} onPress={() => router.push("/tabs/profile/account")}>
+                  <HomeUser style={{marginLeft: 15}} height={35} width={35} />
+                  <Text style={ styles.buttonText }>Account</Text>
+               </Pressable>
+               
+               <Pressable style={styles.button} onPress={() => router.push("/tabs/profile/settings")}>
+                  <Settings style={{marginLeft: 15}} height={35} width={35} />
+                  <Text style={ styles.buttonText }>Settings</Text>
+               </Pressable>
+            </View>
          </View>
       </View>
     );
@@ -56,15 +60,37 @@ const styles = StyleSheet.create({
    container: {
       flex: 1,    
    },
+   avatar: {
+      width: 125,
+      height: 125,
+      borderRadius: 125,
+      marginTop: 25,
+      backgroundColor: "white"
+   },
+   nameText: {
+      fontSize: 22,
+      color: textDark
+   },
+   profileNameContainer: {
+      alignItems: "center"
+   },
+   buttonContainer: {
+      marginTop: 20, 
+      flexDirection: "row"
+   },
    button: {
-      marginTop: 40,
-      color: 'white',
-      height: 40,
-      backgroundColor: dominantColor,
+      marginHorizontal: 10,
+      height: 55,
+      width: "43%",
+      flexDirection: "row",
+      backgroundColor: "white",
+      elevation: 3,
+      alignItems: "center",
       borderRadius: 4,
    },
    buttonText: {
-      color: "white",
+      margin: 16,
+      color: textDark,
    },
    header: {
       justifyContent: 'center',

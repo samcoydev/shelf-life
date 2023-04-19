@@ -1,13 +1,9 @@
-import { Input } from '@rneui/themed'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 import { StyleSheet, Text, View, TextInput, Button } from 'react-native'
-import { primaryColor, textDark } from '../../constants/colors'
+import { textDark } from '../../constants/colors'
 import HeaderText from '../../components/shared/HeaderText'
-import UserPool from '../../context/UserPool'
-import { CognitoUser, CognitoUserAttribute } from 'amazon-cognito-identity-js'
+import { CognitoUser } from 'amazon-cognito-identity-js'
 import { useRouter, useSearchParams } from 'expo-router'
-import { UserAPI } from '../../api/user-api'
-import { UserData } from '../../types/user-data'
 
 type Inputs = {
    code: string
@@ -23,21 +19,7 @@ const ConfirmEmail = () => {
     } = useForm({mode: 'onBlur'})
 
     const onSubmit: SubmitHandler<Inputs> = data => {
-      const userData = {
-         Username: username.toString(),
-         Pool: UserPool,
-       };
-
-      const cognitoUser = new CognitoUser(userData);
-      cognitoUser.confirmRegistration(data.code, true, async (err, result) => {
-        if (err) {
-          console.log(err);
-        } else {
-          console.log("Verified!");
-
-          router.push({pathname: "log-in"})
-        }
-      });
+      console.log("TODO")
     };
 
    return (
