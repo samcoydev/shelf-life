@@ -1,11 +1,14 @@
 import { useRouter, useSegments } from 'expo-router'
 import { createContext, useContext, useEffect, useState } from 'react'
 import { ACCESS_STORE_KEY, AUTH_ENDPOINT, CLIENT_ID } from '@env';
-import { setItemAsync } from 'expo-secure-store'
+import { deleteItemAsync, getItemAsync, setItemAsync } from 'expo-secure-store'
 import axios from 'axios'
-import { ResponseType, makeRedirectUri, useAuthRequest } from 'expo-auth-session'
+import { ResponseType, dismiss, makeRedirectUri, revokeAsync, useAuthRequest } from 'expo-auth-session'
 import { RootContext } from './Root'
 import { UserAPI } from '../api/user-api'
+import jwtDecode from 'jwt-decode'
+
+const AUTH_TAG = "[AUTH] "
 
 function useProtectedRoute(user) {
    const segments = useSegments();
@@ -19,8 +22,6 @@ function useProtectedRoute(user) {
          // Redirect to the sign-in page.
          router.replace("/log-in");
       } else if (user && inAuthGroup) {
-         console.log("User is Authed");
-
          // Redirect away from the sign-in page.
          router.replace("/tabs");
       }
@@ -28,38 +29,23 @@ function useProtectedRoute(user) {
 }
  
 export const AuthProvider = (props: { children: React.ReactNode }) => {  
-   const { user, getUserData } = useContext(RootContext);
+   const { user, getUserData, setUser } = useContext(RootContext);
    const [ bearerToken, setBearerToken ] = useState(null);
 
    const discovery = {
       authorizationEndpoint: AUTH_ENDPOINT
    };
 
-   const [request, response, promptAsync] = useAuthRequest(
-      {
-         responseType: ResponseType.Token,
-         clientId: CLIENT_ID,
-         scopes: ['openid', 'profile', 'email'],
-         redirectUri: makeRedirectUri({
-            scheme: 'com.samcodesthings.com'
-         }),
-      },
-      discovery
-   );
+   const authConfig = {
+      responseType: ResponseType.Token,
+      clientId: CLIENT_ID,
+      scopes: ['openid', 'profile', 'email'],
+      redirectUri: makeRedirectUri({
+         scheme: 'com.samcodesthings.com'
+      }),
+   }
 
-   useEffect(() => {
-      console.log(bearerToken);
-      if (bearerToken !== null)
-         getUserData()
-   }, [bearerToken])
-
-   useEffect(() => {
-      if (response && response.type === 'success') {
-         console.log("Setting token to: " + response.authentication.accessToken)
-         setBearerToken(response.authentication.accessToken)
-         setItemAsync(ACCESS_STORE_KEY, JSON.stringify(bearerToken));
-      }
-   }, [response])
+   const [request, response, promptAsync] = useAuthRequest(authConfig, discovery);
 
    useEffect(() => {
       if (request !== null)
@@ -67,21 +53,37 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
    }, [request])
    
    const getAccessToken = async () => {
-      console.log(discovery);
-      promptAsync().then(() => {}, err => console.error("Error was: ", err));
+      promptAsync().then(async () => {
+         if (!response) return;
+
+         if (response.type === 'success') {
+            setTokens(response.authentication.accessToken);
+         } else {
+            
+         }
+      }, err => console.error("Error was: ", err));
+   }
+
+   const setTokens = async (token: string) => {
+      setBearerToken(token)
+      await setItemAsync('token', token);
+      getUserData();
    }
 
    const logout = async () => {
-      UserAPI.logout().then(res => {
+      UserAPI.logout().then(async res => {
+            await deleteItemAsync('token');
             setBearerToken(null)
+            setUser(null)
          }, err => {console.error(err)}
       )
     }
 
    axios.interceptors.request.use(
-      config => {
-         if (bearerToken)
-            config.headers['Authorization'] = 'Bearer ' + bearerToken
+      async config => {
+         const token = await getItemAsync('token');
+         if (token)
+            config.headers['Authorization'] = 'Bearer ' + token
    
          config.headers['Content-Type'] = "application/json"
 

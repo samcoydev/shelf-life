@@ -8,6 +8,7 @@ import { useContext, useEffect } from "react"
 import { AuthContext } from '../../context/auth'
 import { UserAPI } from '../../api/user-api'
 import { UserData } from '../../types/user-data';
+import { RootContext } from '../../context/Root'
 
 type Inputs = {
    email: string,

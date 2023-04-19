@@ -23,27 +23,18 @@ export const RootProvider = (props: { children: React.ReactNode}) => {
    const [ user, setUser ] = useState(null)
 
    useEffect(() => {
-      if (user !== null)
-         initApp();
-   }, [user])
+      initApp();
+   }, [])
 
    const initApp = async () => {
 
-      // If this is true, then get our user data from the API and
-      // change the state here.
-
-      // If it is not stored, we will leave the user state as null
-      // and let the auth provider do it's job in redirecting to
-      // the sign in page.
 
       setAppInitialized(true);
    }
 
    const getUserData = async () => {
       await UserAPI.getUserData().then(userData => {
-         console.log(ROOT_TAG + " got: ", userData.data);
          setUser(userData.data)
-         console.log(ROOT_TAG + " user: ", user);
       }, err => {
          console.error(err)
       })

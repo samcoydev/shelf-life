@@ -87,4 +87,11 @@ export const UserAPI = {
       })
    },
 
+   deleteUserAlert: async (id: string) => {
+      return await axios({
+         method: 'delete',
+         url: URL_BASE + `/alerts/${id}`
+      })
+   }
+
 }

@@ -11,18 +11,18 @@ import { Cancel } from 'iconoir-react-native'
 import { AuthContext } from '../../../context/auth'
 
 enum AlertTypeEnum {
-   REQUEST = "Request",
-   EXPIRY_ALERT = "Expiry Alert",
-   NOTIFICATION = "Notification"
+   REQUEST = "REQUEST",
+   EXPIRY_ALERT = "EXPIRY_ALERT",
+   NOTIFICATION = "NOTIFICATION"
 }
 
-export const EmptyAlertData = {
-   id: -1,
+export const EmptyAlertData: AlertData = {
+   id: "",
    text: "",
-   alerted_household_id: "",
+   alertedHouseholdId: "",
    expiration: null,
    alertType: null,
-   household_request_id: ""
+   householdRequestId: ""
 }
 
 const Home = () => {
@@ -42,8 +42,7 @@ const Home = () => {
 
       UserAPI.getUserAlerts().then(response => {
          if (response.status === 200) {
-            console.log("Found data: ", response.data);
-            setAlerts(response.data);     
+            setAlerts(response.data);
          }
       }, err => {
          console.error(err);
@@ -52,6 +51,14 @@ const Home = () => {
 
    const closeModal = () => {
       setModalVisible(false);
+   }
+
+   const deleteAlert = () => {
+      let newAlerts: AlertData[] = {...alerts}
+
+      newAlerts.splice(newAlerts.indexOf(currentlyVisibleAlert));
+
+      setAlerts(newAlerts);
    }
 
    return (
@@ -80,13 +87,13 @@ const Home = () => {
             onRequestClose={() => {
                setModalVisible(!modalVisible);
          }}>
-            <AlertModal closeModal={closeModal} alertData={currentlyVisibleAlert} />
+            <AlertModal closeModal={closeModal} alertData={currentlyVisibleAlert} deleteAlert={deleteAlert} />
          </Modal>
       </Container>
     );
 };
 
-const AlertModal = ({closeModal, alertData}) => {
+const AlertModal = ({closeModal, alertData, deleteAlert}) => {
 
    const respond = async (didAccept: boolean) => {
       if (alertData.householdRequestId !== null) {
@@ -104,6 +111,13 @@ const AlertModal = ({closeModal, alertData}) => {
       closeModal();
    }
 
+   
+   const submitOk = async () => {
+      await UserAPI.deleteUserAlert(alertData.id).then(data => {
+         deleteAlert;
+      }, err => console.error("Error: ", err));
+   }
+
    return (
       <View style={styles.centeredView}>
          <View style={styles.modalView}>
@@ -117,17 +131,27 @@ const AlertModal = ({closeModal, alertData}) => {
             </View>
             <Text style={styles.modalText}>{alertData.text}</Text>
             <View style={styles.buttonRow}>
-               <Pressable
-                  style={[styles.button, {backgroundColor: error}]}
-                  onPress={() => respond(false)}>
-                  <Text style={styles.buttonText}>Reject</Text>
-               </Pressable>
-               <Pressable
-                  style={[styles.button, {backgroundColor: success}]}
-                  onPress={() => respond(true)}>
-                  <Text style={styles.buttonText}>Accept</Text>
-               </Pressable>
-            </View>
+               {alertData.alertType !== AlertTypeEnum.NOTIFICATION ? 
+               <>
+                  <Pressable
+                     style={[styles.button, {backgroundColor: error}]}
+                     onPress={() => respond(false)}>
+                     <Text style={styles.buttonText}>Reject</Text>
+                  </Pressable>
+                  <Pressable
+                     style={[styles.button, {backgroundColor: success}]}
+                     onPress={() => respond(true)}>
+                     <Text style={styles.buttonText}>Accept</Text>
+                  </Pressable>
+               </>
+                  :
+                  <Pressable
+                     style={[styles.button, {backgroundColor: success}]}
+                     onPress={submitOk}>
+                     <Text style={styles.buttonText}>OK</Text>
+                  </Pressable>
+               }
+               </View>
          </View>
       </View>
    )

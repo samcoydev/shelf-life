@@ -23,7 +23,6 @@ const Friends = () => {
    const initUserList = async () => {
       UserAPI.getUsersFriends().then(response => {
          if (response.status === 200) {
-            console.log("Found data: ", response.data);
             setFriends(response.data);     
          }
       }, err => {

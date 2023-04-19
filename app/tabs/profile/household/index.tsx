@@ -21,7 +21,6 @@ const Household = () => {
    const initUserList = async () => {
       UserAPI.getUsersByHouseholdId(user.householdId).then(response => {
          if (response.status === 200) {
-            console.log("Found data: ", response.data);
             setUsers(response.data);     
          }
       }, err => {
