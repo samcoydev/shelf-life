@@ -7,7 +7,7 @@ import { ResponseType, makeRedirectUri, useAuthRequest } from 'expo-auth-session
 import { RootContext } from './Root'
 import { UserAPI } from '../api/user-api'
 
-function useProtectedRoute(bearerToken) {
+function useProtectedRoute(user) {
    const segments = useSegments();
    const router = useRouter();
  
@@ -15,20 +15,20 @@ function useProtectedRoute(bearerToken) {
      const inAuthGroup = segments[0] === "(auth)";
  
       // If the user is not signed in and the initial segment is not anything in the auth group.
-      if (!bearerToken && !inAuthGroup) {
+      if (!user && !inAuthGroup) {
          // Redirect to the sign-in page.
          router.replace("/log-in");
-      } else if (bearerToken && inAuthGroup) {
+      } else if (user && inAuthGroup) {
          console.log("User is Authed");
 
          // Redirect away from the sign-in page.
          router.replace("/tabs");
       }
-   }, [bearerToken, segments]);
+   }, [user, segments]);
 }
  
 export const AuthProvider = (props: { children: React.ReactNode }) => {  
-   const { getUserData } = useContext(RootContext);
+   const { user, getUserData } = useContext(RootContext);
    const [ bearerToken, setBearerToken ] = useState(null);
 
    const discovery = {
@@ -92,7 +92,7 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
       }
    )
    
-   useProtectedRoute(bearerToken);
+   useProtectedRoute(user);
 
    const value = {
       bearerToken,

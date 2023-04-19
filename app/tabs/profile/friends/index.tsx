@@ -2,13 +2,13 @@ import { Link, Tabs } from 'expo-router'
 import { Modal, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Header from '../../../../components/HomeHeader'
 import { dominantColor, primaryColor, textDark, textLight } from '../../../../constants/colors'
-import { UserData } from 'amazon-cognito-identity-js'
 import { useContext, useState, useEffect } from 'react'
 import { UserAPI } from '../../../../api/user-api'
 import UserRow from '../../../../components/shared/UserRow'
 import { RootContext } from '../../../../context/Root'
 import { Cancel } from 'iconoir-react-native'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
+import { UserData } from '../../../../types/user-data'
 
 
 const Friends = () => {

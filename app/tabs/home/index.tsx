@@ -13,8 +13,8 @@ import { AuthContext } from '../../../context/auth'
 enum AlertTypeEnum {
    REQUEST = "Request",
    EXPIRY_ALERT = "Expiry Alert",
+   NOTIFICATION = "Notification"
 }
-
 
 export const EmptyAlertData = {
    id: -1,
@@ -27,14 +27,13 @@ export const EmptyAlertData = {
 
 const Home = () => {
    const { user } = useContext(RootContext);
-   const { logout } = useContext(AuthContext)
    const [ alerts, setAlerts ] = useState(null);
    const [ modalVisible, setModalVisible] = useState(false);
    const [ currentlyVisibleAlert, setCurrentlyVisibleAlert] = useState(EmptyAlertData);
 
    useEffect(() => {
       initWithUserData();
-   }, [user])
+   }, [])
 
    const initWithUserData = async () => {
       if (!user) {
