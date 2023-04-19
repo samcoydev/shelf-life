@@ -6,7 +6,7 @@ import axios from 'axios'
 import { ResponseType, dismiss, makeRedirectUri, revokeAsync, useAuthRequest } from 'expo-auth-session'
 import { RootContext } from './Root'
 import { UserAPI } from '../api/user-api'
-import jwtDecode from 'jwt-decode'
+import { showErrorToast, showSuccessToast } from '../util/custom-toasts'
 
 const AUTH_TAG = "[AUTH] "
 
@@ -48,20 +48,23 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
    const [request, response, promptAsync] = useAuthRequest(authConfig, discovery);
 
    useEffect(() => {
+      if (!response) return;
+
+      if (response.type === 'success') {
+         setTokens(response.authentication.accessToken);
+         showSuccessToast("Successfully logged in");
+      } else if (response.type !== "locked") {
+         showErrorToast('There was a problem when trying to log in')
+      }
+   }, [response])
+
+   useEffect(() => {
       if (request !== null)
          getAccessToken();
    }, [request])
    
    const getAccessToken = async () => {
-      promptAsync().then(async () => {
-         if (!response) return;
-
-         if (response.type === 'success') {
-            setTokens(response.authentication.accessToken);
-         } else {
-            
-         }
-      }, err => console.error("Error was: ", err));
+      promptAsync().then(() => {}, err => console.error("Error was: ", err));
    }
 
    const setTokens = async (token: string) => {

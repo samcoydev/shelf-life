@@ -1,13 +1,16 @@
 import { Slot } from 'expo-router'
 import { AuthProvider } from '../context/auth'
 import { RootProvider } from '../context/Root'
+import { RootSiblingParent } from 'react-native-root-siblings';
 
 export default function RootLayout() {
    return (
-      <RootProvider>
-         <AuthProvider>
-            <Slot />
-         </AuthProvider>
-      </RootProvider>
+      <RootSiblingParent>
+         <RootProvider>
+            <AuthProvider>
+               <Slot />
+            </AuthProvider>
+         </RootProvider>
+      </RootSiblingParent>
    )
 }

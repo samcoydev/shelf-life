@@ -9,6 +9,8 @@ import { UserAPI } from '../../../api/user-api'
 import { HouseholdAPI } from '../../../api/household-api'
 import { Cancel } from 'iconoir-react-native'
 import { AuthContext } from '../../../context/auth'
+import Toast from 'react-native-root-toast'
+import { showErrorToast } from '../../../util/custom-toasts'
 
 enum AlertTypeEnum {
    REQUEST = "REQUEST",
@@ -45,7 +47,7 @@ const Home = () => {
             setAlerts(response.data);
          }
       }, err => {
-         console.error(err);
+         showErrorToast(err.message)
       })
    }
 

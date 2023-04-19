@@ -9,6 +9,7 @@ import { RootContext } from '../../../../context/Root'
 import { Cancel } from 'iconoir-react-native'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 import { UserData } from '../../../../types/user-data'
+import { showErrorToast, showSuccessToast } from '../../../../util/custom-toasts'
 
 
 const Friends = () => {
@@ -71,10 +72,12 @@ const FriendRequestModal = ({closeModal}) => {
    const { control, handleSubmit, formState: {errors, isValid} } = useForm({mode: 'onBlur'})
 
    const sendRequest: SubmitHandler<{email: string}> = async data => {
-      console.log("Sending?");
-      await UserAPI.sendFriendRequest(data.email).then(data => {
+      await UserAPI.sendFriendRequest(data.email).then(res => {
          console.log("Sent friend request");
-      }, err => console.error("There was a problem: ", err));
+         showSuccessToast(`Sent a friend request to ${data.email}!`)
+      }, err => {
+         showErrorToast("We ran into an issue sending that user a request, please try again later.");
+      });
    }
    
    return (

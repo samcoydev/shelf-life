@@ -48,7 +48,7 @@ export default function AppLayout() {
                   options={{ 
                      tabBarLabel: ({ focused }) => <Text style={[ styles.tabButtonStyle, focused ? styles.activeButton : null ]}>Home</Text>,
                      tabBarIcon: ({focused}) => { return <HomeSimple color={focused ? dominantColor : textLight} /> }
-                  }} 
+                  }}
                />
                <Tabs.Screen 
                   name="pantry" 
