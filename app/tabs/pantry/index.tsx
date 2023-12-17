@@ -1,19 +1,31 @@
 import { useRouter } from 'expo-router'
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native'
 import Container from '../../../components/shared/Container'
 import PantryProduct from '../../../components/shared/PantryProduct'
-import { textDark, textLight } from '../../../constants/colors'
+import {success, textDark, textLight} from '../../../constants/colors'
+import {useEffect, useState} from "react";
+import {PantryAPI} from "../../../api/pantry-api";
+import {AlertData} from "../../../types/alert-data";
+import Alert from "../../../components/shared/Alert";
+import {PantryItemData} from "../../../types/pantry-item-data";
 
 
 const Pantry = () => {
    const router = useRouter();
+   const [ pantryItems, setPantryItems ] = useState(null);
 
-   const today = new Date();
-   const withinAFewDays = new Date(today.getFullYear(), today.getMonth(), today.getDate()+2);
-   const withinTheWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate()+7);
-   const laterThanAWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate()+9);
+   useEffect(() => {
+      initPantry();
+   }, [])
 
-   const testUrl: string = "/pantry/productModal"
+   const initPantry = async () => {
+      PantryAPI.getPantryItems().then(response => {
+         if (response.status === 200) {
+            console.log("Data is: ", response.data);
+            setPantryItems(response.data);
+         }
+      })
+   }
 
    return (
       <Container>
@@ -23,19 +35,11 @@ const Pantry = () => {
                <Text style={ styles.subtitleText }>Swipe right to add a product to your list and hide from your pantry.</Text>
             </View>
 
-            <PantryProduct onPress={() => router.push(testUrl)} name={"Cupcakes"} expirationDate= {laterThanAWeek} />
-            <PantryProduct onPress={() => router.push(testUrl)} name={"Bananas"} expirationDate= {today} />
-            <PantryProduct onPress={() => router.push(testUrl)} name={"Grapes"} expirationDate= {laterThanAWeek} />
-            <PantryProduct onPress={() => router.push(testUrl)} name={"Chai Tea"} expirationDate= {laterThanAWeek} />
-            <PantryProduct onPress={() => router.push(testUrl)} name={"Apples"} expirationDate= {withinAFewDays} />
-            <PantryProduct onPress={() => router.push(testUrl)} name={"Watermelon"} expirationDate= {withinTheWeek} />
-            <PantryProduct onPress={() => router.push(testUrl)} name={"Cinnamon"} expirationDate= {laterThanAWeek} />
-            <PantryProduct onPress={() => router.push(testUrl)} name={"Taco Meat"} expirationDate= {laterThanAWeek} />
-            <PantryProduct onPress={() => router.push(testUrl)} name={"Steak"} expirationDate= {laterThanAWeek} />
-            <PantryProduct onPress={() => router.push(testUrl)} name={"Pork tips"} expirationDate= {withinAFewDays} />
-            <PantryProduct onPress={() => router.push(testUrl)} name={"Lettuce"} expirationDate= {withinTheWeek} />
-            <PantryProduct onPress={() => router.push(testUrl)} name={"Strawberries"} expirationDate= {withinTheWeek} />
-            <PantryProduct onPress={() => router.push(testUrl)} name={"Cereal"} expirationDate= {today} />
+            {pantryItems ? pantryItems.map((pantryItem: PantryItemData, index)=>{
+               return (
+                   <PantryProduct key={index} onPress={() => {}} pantryItem={pantryItem} />
+               )
+            }) : ""}
          </ScrollView>
       </Container>
     );

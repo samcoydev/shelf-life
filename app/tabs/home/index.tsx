@@ -7,10 +7,11 @@ import { AlertData } from '../../../types/alert-data'
 import { RootContext } from '../../../context/Root'
 import { UserAPI } from '../../../api/user-api'
 import { HouseholdAPI } from '../../../api/household-api'
-import { Cancel } from 'iconoir-react-native'
+import { Cancel, ScanBarcode } from 'iconoir-react-native'
 import { AuthContext } from '../../../context/auth'
 import Toast from 'react-native-root-toast'
 import { showErrorToast } from '../../../util/custom-toasts'
+import { useRouter } from 'expo-router'
 
 enum AlertTypeEnum {
    REQUEST = "REQUEST",
@@ -28,6 +29,7 @@ export const EmptyAlertData: AlertData = {
 }
 
 const Home = () => {
+   const router = useRouter();
    const { user } = useContext(RootContext);
    const [ alerts, setAlerts ] = useState(null);
    const [ modalVisible, setModalVisible] = useState(false);
@@ -63,6 +65,10 @@ const Home = () => {
       setAlerts(newAlerts);
    }
 
+   const openScanner = () => {
+      router.push("/scanner")
+   }
+
    return (
       <Container>
          <ScrollView style={ styles.scrollContainer } contentContainerStyle={{ alignItems: "center" }}>
@@ -74,13 +80,20 @@ const Home = () => {
             {alerts ? alerts.map((alert: AlertData, index)=>{
                return (
                   <Pressable key={index} onPress={() => {
-                     setModalVisible(true) 
+                     setModalVisible(true)
                      setCurrentlyVisibleAlert(alerts[index]);
                   }}>
                      <Alert alertData={alert} color={success} />
                   </Pressable>
                )
             }) : ""}
+
+
+            <Pressable
+                  style={ styles.scanButton }
+                  onPress={openScanner}>
+                     <ScanBarcode height={45} width={45} />
+            </Pressable>
          </ScrollView>
          <Modal
             animationType="fade"
@@ -109,14 +122,14 @@ const AlertModal = ({closeModal, alertData, deleteAlert}) => {
             console.log("Responded to friend request: ", alertData, didAccept);
          }, err => console.error("There was a problem: ", err));
       }
-      
+
       closeModal();
    }
 
-   
+
    const submitOk = async () => {
       await UserAPI.deleteUserAlert(alertData.id).then(data => {
-         deleteAlert;
+         deleteAlert();
       }, err => console.error("Error: ", err));
    }
 
@@ -133,7 +146,7 @@ const AlertModal = ({closeModal, alertData, deleteAlert}) => {
             </View>
             <Text style={styles.modalText}>{alertData.text}</Text>
             <View style={styles.buttonRow}>
-               {alertData.alertType !== AlertTypeEnum.NOTIFICATION ? 
+               {alertData.alertType !== AlertTypeEnum.NOTIFICATION ?
                <>
                   <Pressable
                      style={[styles.button, {backgroundColor: error}]}
@@ -199,6 +212,16 @@ const styles = StyleSheet.create({
    buttonText: {
       color: 'white'
    },
+   scanButton: {
+      backgroundColor: 'white',
+      padding: 3,
+      borderRadius: 75,
+      alignItems: "center",
+      justifyContent: "center",
+      width: 75,
+      height: 75,
+      elevation: 3,
+   },
    modalText: {
       marginBottom: 15,
       textAlign: 'center',
@@ -220,7 +243,7 @@ const styles = StyleSheet.create({
       flex: 1,
       width: "100%",
       marginBottom: 60
-   }, 
+   },
    modalHeaderContainer: {
       width: "95%",
       paddingTop: 5,

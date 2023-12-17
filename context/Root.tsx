@@ -36,7 +36,7 @@ export const RootProvider = (props: { children: React.ReactNode}) => {
       await UserAPI.getUserData().then(userData => {
          setUser(userData.data)
       }, err => {
-         console.error(err)
+         console.error("Problem getting user data: ", JSON.stringify(err))
       })
    }
 

@@ -1,21 +1,15 @@
-import { Controller, SubmitHandler, useForm } from 'react-hook-form'
-import { StyleSheet, Text, View, TextInput, Button, Pressable } from 'react-native'
-import { accentColor, dominantColor, textDark, textLight } from '../../constants/colors'
-import HeaderText from '../../components/shared/HeaderText'
-import { AuthenticationDetails, CognitoUser, CognitoUserAttribute } from 'amazon-cognito-identity-js'
-import { Link, useRouter, useSearchParams } from 'expo-router'
-import { useContext, useEffect } from "react"
+import { StyleSheet, Text, View, Pressable } from 'react-native'
+import { dominantColor, textDark } from '../../constants/colors'
+import { useRouter } from 'expo-router'
+import { useContext } from "react"
 import { AuthContext } from '../../context/auth'
-import { UserAPI } from '../../api/user-api'
-import { UserData } from '../../types/user-data';
-import { RootContext } from '../../context/Root'
 
 type Inputs = {
    email: string,
    password: string,
  };
 
-const Login = () => {  
+const Login = () => {
    const router = useRouter();
    const { getAccessToken } = useContext(AuthContext)
 

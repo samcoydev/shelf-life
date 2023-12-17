@@ -2,24 +2,27 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { accentColor, dominantColor, error, success, textLight, warn } from '../../constants/colors'
 import { err } from 'react-native-svg/lib/typescript/xml'
 import { Cancel, DeleteCircle, Menu } from 'iconoir-react-native'
+import {PantryItemData} from "../../types/pantry-item-data";
+import pantry from "../../app/tabs/pantry";
 
 
 type ProductProps = {
-   id?: string;
-   name: string;
-   expirationDate: Date;
+   pantryItem: PantryItemData;
    onPress: () => void;
 }
 
-const PantryProduct = ({id, name, expirationDate, onPress}: ProductProps) => {
+const PantryProduct = ({pantryItem, onPress}: ProductProps) => {
 
    let today: Date = new Date();
-   let dateDifference = (expirationDate.getDate() - today.getDate())
+   let dateDifference = pantryItem.expirationDate ? (pantryItem.expirationDate.getDate() - today.getDate()) : 0;
 
    const getColor = (): string => {
+      if (pantryItem.expirationDate === null || pantryItem.expirationDate === undefined)
+         return success;
+
       if (dateDifference <= 7 && dateDifference >= 1)
          return warn;
-      
+
       if (dateDifference <= 0)
          return error;
 
@@ -34,18 +37,20 @@ const PantryProduct = ({id, name, expirationDate, onPress}: ProductProps) => {
          prefix = "Expired today "
 
       if (dateDifference < 0)
-         prefix = "Expired on " + expirationDate.toLocaleDateString();
+         prefix = "Expired on " + pantryItem.expirationDate.toLocaleDateString();
 
-      return prefix + expirationDate.toLocaleDateString();
+      return prefix + pantryItem.expirationDate.toLocaleDateString();
    }
 
    return (
       <Pressable onPress={() => onPress()} style={ styles.container }>
          <View style={{ flexDirection: "row", justifyContent: "space-between"}} >
             <View style={[ styles.colorContainer, { backgroundColor: getColor()} ]}></View>
-            <View style={ styles.textContainer }> 
-               <Text>{ name }</Text>
-               <Text style={{ color: dateDifference <= 0 ? error : textLight }} >{ getExpiredText() }</Text>
+            <View style={ styles.textContainer }>
+               <Text>{ pantryItem.product.name }</Text>
+               { pantryItem.expirationDate ? (
+                   <Text style={{ color: dateDifference <= 0 ? error : textLight }} >{ getExpiredText() }</Text>
+               ) : <></>}
             </View>
             <Cancel style={styles.deleteButton} height={15} width={15} />
          </View>
@@ -70,7 +75,7 @@ export const styles = StyleSheet.create({
       borderRadius: 6,
       width: 5,
       justifyContent: "flex-end"
-   }, 
+   },
    colorContainer: {
       borderRadius: 6,
       width: 5

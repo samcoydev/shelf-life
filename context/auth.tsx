@@ -13,10 +13,11 @@ const AUTH_TAG = "[AUTH] "
 function useProtectedRoute(user) {
    const segments = useSegments();
    const router = useRouter();
- 
+
    useEffect(() => {
      const inAuthGroup = segments[0] === "(auth)";
- 
+     console.log(user);
+
       // If the user is not signed in and the initial segment is not anything in the auth group.
       if (!user && !inAuthGroup) {
          // Redirect to the sign-in page.
@@ -27,8 +28,8 @@ function useProtectedRoute(user) {
       }
    }, [user, segments]);
 }
- 
-export const AuthProvider = (props: { children: React.ReactNode }) => {  
+
+export const AuthProvider = (props: { children: React.ReactNode }) => {
    const { user, getUserData, setUser } = useContext(RootContext);
    const [ bearerToken, setBearerToken ] = useState(null);
 
@@ -49,6 +50,7 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
 
    useEffect(() => {
       if (!response) return;
+      console.log("response changed", response.type)
 
       if (response.type === 'success') {
          setTokens(response.authentication.accessToken);
@@ -62,9 +64,11 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
       if (request !== null)
          getAccessToken();
    }, [request])
-   
+
    const getAccessToken = async () => {
-      promptAsync().then(() => {}, err => console.error("Error was: ", err));
+      promptAsync().then(() => {
+
+      }, err => console.error("Error was: ", err));
    }
 
    const setTokens = async (token: string) => {
@@ -87,7 +91,7 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
          const token = await getItemAsync('token');
          if (token)
             config.headers['Authorization'] = 'Bearer ' + token
-   
+
          config.headers['Content-Type'] = "application/json"
 
          return config;
@@ -96,7 +100,7 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
          Promise.reject(error)
       }
    )
-   
+
    useProtectedRoute(user);
 
    const value = {
@@ -104,7 +108,7 @@ export const AuthProvider = (props: { children: React.ReactNode }) => {
       getAccessToken,
       logout
    }
- 
+
    return (
      <AuthContext.Provider value={value}>
        {props.children}

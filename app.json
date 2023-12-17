@@ -29,6 +29,14 @@
     "web": {
       "bundler": "metro",
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-barcode-scanner",
+        {
+          "cameraPermission": "Allow Shelf Life to access the camera."
+        }
+      ]
+    ]
   }
 }
